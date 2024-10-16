@@ -1,5 +1,4 @@
-﻿
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text;
 using Tgs.ServiceUtility;
 using SabaSimulator.API.Models.ConfirmBet;
@@ -8,7 +7,6 @@ namespace SabaSimulator.API.Services;
 
 public class ConfirmBetService : IGetService<ConfirmBetRequest, ConfirmBetResult>
 {
-
 	private readonly HttpClient _httpClient;
 	private readonly string _baseUrl;
 
@@ -25,14 +23,14 @@ public class ConfirmBetService : IGetService<ConfirmBetRequest, ConfirmBetResult
 			var jsonContent = JsonSerializer.Serialize(query);
 			var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-			var response = await _httpClient.PostAsync($"{_baseUrl}/api/player/confirmbet", content, cancellationToken);
+			var response = await _httpClient.PostAsync($"{_baseUrl}/confirmbet", content, cancellationToken);
 			response.EnsureSuccessStatusCode();
 
 			var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 			var result = JsonSerializer.Deserialize<ConfirmBetResult>(responseContent);
 			// Todo
 
-			return result ;
+			return result;
 		}
 		catch (Exception ex)
 		{

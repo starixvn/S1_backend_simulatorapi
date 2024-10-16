@@ -7,7 +7,6 @@ namespace SabaSimulator.API.Services;
 
 public class CancelBetService : IGetService<CancelBetRequest, CancelBetResult>
 {
-
 	private readonly HttpClient _httpClient;
 	private readonly string _baseUrl;
 
@@ -24,7 +23,7 @@ public class CancelBetService : IGetService<CancelBetRequest, CancelBetResult>
 			var jsonContent = JsonSerializer.Serialize(query);
 			var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-			var response = await _httpClient.PostAsync($"{_baseUrl}/api/player/cancelbet", content, cancellationToken);
+			var response = await _httpClient.PostAsync($"{_baseUrl}/cancelbet", content, cancellationToken);
 			response.EnsureSuccessStatusCode();
 
 			var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -40,4 +39,3 @@ public class CancelBetService : IGetService<CancelBetRequest, CancelBetResult>
 		}
 	}
 }
-

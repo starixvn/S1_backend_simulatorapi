@@ -22,7 +22,7 @@ public class PlaceBetParlayService : IGetService<PlaceBetParlayRequest, PlaceBet
 		{
 			var jsonContent = JsonSerializer.Serialize(query);
 			var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-			var response = await _httpClient.PostAsync($"{_baseUrl}/api/player/placebetparlay", content, cancellationToken);
+			var response = await _httpClient.PostAsync($"{_baseUrl}/placebetparlay", content, cancellationToken);
 			response.EnsureSuccessStatusCode();
 			var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 			var result = JsonSerializer.Deserialize<PlaceBetParlayResult>(responseContent);

@@ -8,7 +8,6 @@ namespace SabaSimulator.API.Services;
 
 public class ResettleService : IGetService<ResettleRequest, ResettleResult>
 {
-
 	private readonly HttpClient _httpClient;
 	private readonly string _baseUrl;
 
@@ -24,7 +23,7 @@ public class ResettleService : IGetService<ResettleRequest, ResettleResult>
 		{
 			var jsonContent = JsonSerializer.Serialize(query);
 			var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-			var response = await _httpClient.PostAsync($"{_baseUrl}/api/player/resettle", content, cancellationToken);
+			var response = await _httpClient.PostAsync($"{_baseUrl}/resettle", content, cancellationToken);
 			response.EnsureSuccessStatusCode();
 			var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 			var result = JsonSerializer.Deserialize<ResettleResult>(responseContent);

@@ -8,7 +8,6 @@ namespace SabaSimulator.API.Services;
 
 public class BalanceService : IGetService<GetBalanceRequest, GetBalanceResult>
 {
-
 	private readonly HttpClient _httpClient;
 	private readonly string _baseUrl;
 
@@ -25,7 +24,7 @@ public class BalanceService : IGetService<GetBalanceRequest, GetBalanceResult>
 			var jsonContent = JsonSerializer.Serialize(query);
 			var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-			var response = await _httpClient.PostAsync($"{_baseUrl}/api/player/getbalance", content, cancellationToken);
+			var response = await _httpClient.PostAsync($"{_baseUrl}/getbalance", content, cancellationToken);
 			response.EnsureSuccessStatusCode();
 
 			var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -41,4 +40,3 @@ public class BalanceService : IGetService<GetBalanceRequest, GetBalanceResult>
 		}
 	}
 }
-

@@ -23,7 +23,7 @@ public class ConfirmBetparlayService : IGetService<ConfirmBetParlayRequest, Conf
 			var jsonContent = JsonSerializer.Serialize(query);
 			var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-			var response = await _httpClient.PostAsync($"{_baseUrl}/api/player/confirmbetparlay", content, cancellationToken);
+			var response = await _httpClient.PostAsync($"{_baseUrl}/confirmbetparlay", content, cancellationToken);
 			response.EnsureSuccessStatusCode();
 
 			var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);

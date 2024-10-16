@@ -2,11 +2,11 @@
 using System.Text;
 using SabaSimulator.API.Models.PlaceBet;
 using Tgs.ServiceUtility;
+
 namespace SabaSimulator.API.Services;
 
 public class PlaceBetService : IGetService<PlaceBetRequest, PlaceBetResult>
 {
-
 	private readonly HttpClient _httpClient;
 	private readonly string _baseUrl;
 
@@ -22,7 +22,7 @@ public class PlaceBetService : IGetService<PlaceBetRequest, PlaceBetResult>
 		{
 			var jsonContent = JsonSerializer.Serialize(query);
 			var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-			var response = await _httpClient.PostAsync($"{_baseUrl}/api/player/placebet", content, cancellationToken);
+			var response = await _httpClient.PostAsync($"{_baseUrl}/placebet", content, cancellationToken);
 			response.EnsureSuccessStatusCode();
 			var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 			var result = JsonSerializer.Deserialize<PlaceBetResult>(responseContent);

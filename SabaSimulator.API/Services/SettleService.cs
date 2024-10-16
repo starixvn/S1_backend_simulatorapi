@@ -7,7 +7,6 @@ namespace SabaSimulator.API.Services;
 
 public class SettleService : IGetService<SettleRequest, SettleResult>
 {
-
 	private readonly HttpClient _httpClient;
 	private readonly string _baseUrl;
 
@@ -23,19 +22,19 @@ public class SettleService : IGetService<SettleRequest, SettleResult>
 		{
 			var jsonContent = JsonSerializer.Serialize(query);
 			var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-			var response = await _httpClient.PostAsync($"{_baseUrl}/api/player/settle", content, cancellationToken);
+			var response = await _httpClient.PostAsync($"{_baseUrl}/settle", content, cancellationToken);
 			response.EnsureSuccessStatusCode();
 			var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 			var result = JsonSerializer.Deserialize<SettleResult>(responseContent);
 
 			// Todo
 
-			return result ?? new SettleResult("1",  "Failed to deserialize response");
+			return result ?? new SettleResult("1", "Failed to deserialize response");
 		}
 		catch (Exception ex)
 		{
 			Console.Write(ex.ToString());
-			return new SettleResult("0",  null);
+			return new SettleResult("0", null);
 		}
 	}
 }

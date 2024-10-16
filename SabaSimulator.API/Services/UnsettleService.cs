@@ -8,7 +8,6 @@ namespace SabaSimulator.API.Services;
 
 public class UnsettleService : IGetService<UnsettleRequest, UnsettleResult>
 {
-
 	private readonly HttpClient _httpClient;
 	private readonly string _baseUrl;
 
@@ -24,11 +23,10 @@ public class UnsettleService : IGetService<UnsettleRequest, UnsettleResult>
 		{
 			var jsonContent = JsonSerializer.Serialize(query);
 			var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-			var response = await _httpClient.PostAsync($"{_baseUrl}/api/player/unsettle", content, cancellationToken);
+			var response = await _httpClient.PostAsync($"{_baseUrl}/unsettle", content, cancellationToken);
 			response.EnsureSuccessStatusCode();
 			var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 			var result = JsonSerializer.Deserialize<UnsettleResult>(responseContent);
-
 
 			return result ?? new UnsettleResult("1", "Failed to deserialize response");
 		}
@@ -39,4 +37,3 @@ public class UnsettleService : IGetService<UnsettleRequest, UnsettleResult>
 		}
 	}
 }
-
