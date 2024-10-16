@@ -21,4 +21,3 @@ COPY --from=publish /app/publish .
 
 
 ENTRYPOINT ["dotnet", "SabaSimulator.API.dll"]
-EXPOSE 5000
