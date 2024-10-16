@@ -1,0 +1,11 @@
+﻿using System.Reflection;
+
+namespace SabaSimulator.API.DependencyInjection;
+
+public static class ServiceCollecitonExtensions
+{
+	public static IServiceCollection AddSabaPlusApiCore(
+	this IServiceCollection services)
+	=> services
+	.RegisterAllServiceUtilityTypes(Assembly.GetExecutingAssembly(), ServiceLifetime.Transient);
+}

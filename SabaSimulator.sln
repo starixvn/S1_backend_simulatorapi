@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35013.160
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SabaSimulator.API", "SabaSimulator.API\SabaSimulator.API.csproj", "{CC1C0B39-7756-47F0-8B47-A2F3190820EE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CC1C0B39-7756-47F0-8B47-A2F3190820EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC1C0B39-7756-47F0-8B47-A2F3190820EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC1C0B39-7756-47F0-8B47-A2F3190820EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC1C0B39-7756-47F0-8B47-A2F3190820EE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CE100C38-5465-4586-8C16-7FB4A497670B}
+	EndGlobalSection
+EndGlobal
