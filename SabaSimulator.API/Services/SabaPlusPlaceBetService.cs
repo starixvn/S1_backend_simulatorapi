@@ -26,7 +26,7 @@ public class SabaPlusPlaceBetService : IGetService<SabaPlusPlaceBetRequest,  obj
 		{
 			var jsonContent = JsonSerializer.Serialize(query);
 			var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-			var response = await _httpClient.PostAsync($"{_sabaPlusUrl}/api/player/placebet", content);
+			var response = await _httpClient.PostAsync($"{_sabaPlusUrl}/placebet", content);
 			if (!response.IsSuccessStatusCode)
 			{
 				var errorContent = await response.Content.ReadAsStringAsync();

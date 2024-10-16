@@ -26,7 +26,7 @@ public class SabaPlusVoidGameService : IGetService<VoidGameRequest, object>
 		{
 			var jsonContent = JsonSerializer.Serialize(query);
 			var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-			var response = await _httpClient.PostAsync($"{_sabaPlusUrl}/api/player/voidGame", content);
+			var response = await _httpClient.PostAsync($"{_sabaPlusUrl}/voidGame", content);
 			if (!response.IsSuccessStatusCode)
 			{
 				var errorContent = await response.Content.ReadAsStringAsync();

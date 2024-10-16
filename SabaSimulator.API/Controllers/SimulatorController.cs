@@ -156,7 +156,7 @@ namespace SabaSimulator.API.Controllers
 			{
 				var jsonContent = JsonSerializer.Serialize(query);
 				var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-				var response = await _httpClient.PostAsync($"{_sabaPlusUrl}/api/player/getBalance", content);
+				var response = await _httpClient.PostAsync($"{_sabaPlusUrl}/getBalance", content);
 				if (!response.IsSuccessStatusCode)
 				{
 					var errorContent = await response.Content.ReadAsStringAsync();

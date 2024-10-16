@@ -27,7 +27,7 @@ public class SabaPlusFreeSpinService : IGetService<SabaPlusFreeSpinRequest, obje
 		{
 			var jsonContent = JsonSerializer.Serialize(query);
 			var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-			var response = await _httpClient.PostAsync($"{_sabaPlusUrl}/api/player/FreeSpin", content);
+			var response = await _httpClient.PostAsync($"{_sabaPlusUrl}/FreeSpin", content);
 			if (!response.IsSuccessStatusCode)
 			{
 				var errorContent = await response.Content.ReadAsStringAsync();
