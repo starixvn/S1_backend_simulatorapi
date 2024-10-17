@@ -3,7 +3,12 @@
 namespace SabaSimulator.API.Models.SabaPlusPlaceBet;
 public class SabaPlusPlaceBetRequest : GameProviderRequest<SabaPlusPlaceBetRequestPayload>;
 
-public record SabaPlusPlaceBetRequestPayload(string? OperatorCustId, string? WalletSideToken, string? GameType, string? IpAddress, SabaPlusPlaceBetDataSet[] BetDataSet)
+public record SabaPlusPlaceBetRequestPayload(
+	string? OperatorCustId,
+	string? WalletSideToken,
+	string? GameType,
+	string? IpAddress,
+	SabaPlusPlaceBetDataSet[] BetDataSet)
 {
 	public string? GameProviderCode => WalletSideToken?.Split('@')[0];
 };

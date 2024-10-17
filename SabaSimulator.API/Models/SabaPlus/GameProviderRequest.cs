@@ -6,5 +6,7 @@ public class GameProviderRequest<TPayload>
 
 	public string? Seq { get; set; }
 
+	public string? OperatorKey { get; set; }
+
 	public TPayload? Payload { get; set; }
 }

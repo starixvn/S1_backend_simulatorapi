@@ -27,7 +27,15 @@ public class SabaPlusPlaceBetAndSettleService : IGetService<SabaPlusPlaceBetAndS
 		{
 			var jsonContent = JsonSerializer.Serialize(query);
 			var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-			var response = await _httpClient.PostAsync($"{_sabaPlusUrl}/PlaceBetAndSettle", content);
+			var operatorSign = MD5Helper.ToMD5(jsonContent + query.OperatorKey);
+
+			var request = new HttpRequestMessage(HttpMethod.Post, $"{_sabaPlusUrl}/PlaceBetAndSettle")
+			{
+				Content = content
+			};
+			request.Headers.Add("operator-sign", operatorSign);
+
+			var response = await _httpClient.SendAsync(request);
 			if (!response.IsSuccessStatusCode)
 			{
 				var errorContent = await response.Content.ReadAsStringAsync();
