@@ -1,6 +1,9 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using System.Net.Sockets;
+using System.Text.Json;
+using Microsoft.Extensions.Caching.Memory;
 using SabaSimulator.API.Models.ConfirmBet;
 using SabaSimulator.API.Models.GetBetDetail;
+using SabaSimulator.API.Models.Settle;
 
 namespace SabaSimulator.API.Helper;
 
@@ -8,11 +11,16 @@ public interface IMemoryDb
 {
 	public void SetBetDetailKey(ConfirmBetRequest confirmBetRequest);
 
+	public void SetBetDetailKey(SettleRequest settleRequest);
+
 	public GetBetDetailResponse GetBetDetail(GetBetDetailRequest inputs);
 }
 
 public class MemoryDb(IMemoryCache memoryCache) : IMemoryDb
 {
+	private List<BetDetail> PlacebetTicket = new List<BetDetail>();
+	private List<BetDetail> SettledTicket = new List<BetDetail>();
+
 	public GetBetDetailResponse GetBetDetail(GetBetDetailRequest key)
 	{
 		var savedData = new GetBetDetailResponse()
@@ -20,49 +28,63 @@ public class MemoryDb(IMemoryCache memoryCache) : IMemoryDb
 			ErrorCode = 0,
 			Message = "Success"
 		};
-		var exist = memoryCache.TryGetValue(key.vendor_id, out List<BetDetail>? betDetails);
 
-		if (!exist || betDetails is null)
+		if (PlacebetTicket.Count == 0)
 		{
 			savedData.Data = new()
 			{
-				BetDetails = [],
+				LastVersionKey = 0,
+				BetDetails = JsonSerializer.Deserialize<List<BetDetail>>(JsonSerializer.Serialize(SettledTicket)) ?? [],
 				BetNumberDetails = [],
 				BetVirtualSportDetails = [],
 				BetCasinoDetails = [],
 			};
+
+			SettledTicket = [];
+
 			return savedData;
 		}
 
-		memoryCache.Set<GetBetDetailResponse?>(key.vendor_id, default);
-
+		var tickets = JsonSerializer.Deserialize<List<BetDetail>>(JsonSerializer.Serialize(PlacebetTicket)) ?? [];
 		savedData.Data = new()
 		{
 			LastVersionKey = 0,
-			BetDetails = betDetails,
+			BetDetails = tickets,
 			BetNumberDetails = [],
 			BetVirtualSportDetails = [],
 			BetCasinoDetails = [],
 		};
+
+		SettledTicket.AddRange(tickets.Where(ticket => !SettledTicket.Exists(x => x.trans_id.Equals(ticket))));
+
+		PlacebetTicket = [];
+
 		return savedData;
 	}
 
 	public void SetBetDetailKey(ConfirmBetRequest confirmBetRequest)
 	{
-		var exist = memoryCache.TryGetValue("y2g53zl9g4", out List<BetDetail>? betDetails);
-
-		betDetails = betDetails ?? [];
-
 		foreach (var transaction in confirmBetRequest.message.Txns)
 		{
-			betDetails.Add(new BetDetail()
+			PlacebetTicket.Add(new BetDetail()
 			{
 				trans_id = transaction.TxId,
 				vendor_member_id = confirmBetRequest.message.UserId,
 				transaction_time = confirmBetRequest.message.TransactionTime,
 			});
 		}
+	}
 
-		memoryCache.Set("y2g53zl9g4", betDetails);
+	public void SetBetDetailKey(SettleRequest settleRequest)
+	{
+		var tickets = JsonSerializer.Deserialize<List<BetDetail>>(JsonSerializer.Serialize(PlacebetTicket)) ?? [];
+		foreach (var transaction in settleRequest.message.Txns)
+		{
+			var savedTicket = tickets.FindAll(ticket => ticket.trans_id.Equals(transaction.TxId));
+			if (savedTicket.Count != 0)
+			{
+				SettledTicket.Add(savedTicket[0]);
+			}
+		}
 	}
 }
