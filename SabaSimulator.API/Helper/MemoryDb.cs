@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System.Data;
+using System.Net.Sockets;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
 using SabaSimulator.API.Models.ConfirmBet;
@@ -18,8 +19,9 @@ public interface IMemoryDb
 
 public class MemoryDb(IMemoryCache memoryCache) : IMemoryDb
 {
-	private List<BetDetail> PlacebetTicket = new List<BetDetail>();
-	private List<BetDetail> SettledTicket = new List<BetDetail>();
+	private List<BetDetail> PlacebetTicket = new();
+	private List<BetDetail> PendingTicket = new();
+	private List<BetDetail> SettledTicket = new();
 
 	public GetBetDetailResponse GetBetDetail(GetBetDetailRequest key)
 	{
@@ -28,6 +30,11 @@ public class MemoryDb(IMemoryCache memoryCache) : IMemoryDb
 			ErrorCode = 0,
 			Message = "Success"
 		};
+
+		if (PlacebetTicket.Count == 0 && SettledTicket.Count == 0)
+		{
+			return savedData;
+		}
 
 		if (PlacebetTicket.Count == 0)
 		{
@@ -55,7 +62,9 @@ public class MemoryDb(IMemoryCache memoryCache) : IMemoryDb
 			BetCasinoDetails = [],
 		};
 
-		SettledTicket.AddRange(tickets.Where(ticket => !SettledTicket.Exists(x => x.trans_id.Equals(ticket))));
+		var pendingTickets = JsonSerializer.Deserialize<List<BetDetail>>(JsonSerializer.Serialize(PlacebetTicket)) ?? [];
+		pendingTickets.RemoveAll(ticket => SettledTicket.Exists(settleTicket => settleTicket.trans_id == ticket.trans_id));
+		PendingTicket.AddRange(pendingTickets);
 
 		PlacebetTicket = [];
 
@@ -71,19 +80,28 @@ public class MemoryDb(IMemoryCache memoryCache) : IMemoryDb
 				trans_id = transaction.TxId,
 				vendor_member_id = confirmBetRequest.message.UserId,
 				transaction_time = confirmBetRequest.message.TransactionTime,
+				stake = transaction.ActualAmount,
+				ticket_status = "running",
 			});
 		}
 	}
 
 	public void SetBetDetailKey(SettleRequest settleRequest)
 	{
-		var tickets = JsonSerializer.Deserialize<List<BetDetail>>(JsonSerializer.Serialize(PlacebetTicket)) ?? [];
+		var placeBetTickets = JsonSerializer.Deserialize<List<BetDetail>>(JsonSerializer.Serialize(PlacebetTicket)) ?? [];
+		var pendingTickets = JsonSerializer.Deserialize<List<BetDetail>>(JsonSerializer.Serialize(PendingTicket)) ?? [];
+
+		placeBetTickets.AddRange(pendingTickets);
 		foreach (var transaction in settleRequest.message.Txns)
 		{
-			var savedTicket = tickets.FindAll(ticket => ticket.trans_id.Equals(transaction.TxId));
+			var savedTicket = placeBetTickets.FindAll(ticket => ticket.trans_id.Equals(transaction.TxId));
 			if (savedTicket.Count != 0)
 			{
+				savedTicket[0].ticket_status = transaction.Status;
+				savedTicket[0].settlement_time = transaction.SettlementTime;
 				SettledTicket.Add(savedTicket[0]);
+
+				PendingTicket.RemoveAll(ticket => ticket.trans_id == savedTicket[0].trans_id);
 			}
 		}
 	}
