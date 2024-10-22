@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
 using SabaSimulator.API.Models.ConfirmBet;
+using SabaSimulator.API.Models.ConfirmbetParlay;
 using SabaSimulator.API.Models.GetBetDetail;
 using SabaSimulator.API.Models.Settle;
 
@@ -11,6 +12,8 @@ namespace SabaSimulator.API.Helper;
 public interface IMemoryDb
 {
 	public void SetBetDetailKey(ConfirmBetRequest confirmBetRequest);
+
+	void SetBetDetailKey(ConfirmBetParlayRequest source);
 
 	public void SetBetDetailKey(SettleRequest settleRequest);
 
@@ -71,6 +74,22 @@ public class MemoryDb(IMemoryCache memoryCache) : IMemoryDb
 		return savedData;
 	}
 
+	public void SetBetDetailKey(ConfirmBetParlayRequest request)
+	{
+		foreach (var transaction in request.message.Txns)
+		{
+			PlacebetTicket.Add(new BetDetail()
+			{
+				trans_id = transaction.TxId,
+				vendor_member_id = request.message.UserId,
+				transaction_time = request.message.TransactionTime,
+				stake = transaction.ActualAmount,
+				ticket_status = "running",
+				odds = transaction.Odds ?? 0,
+			});
+		}
+	}
+
 	public void SetBetDetailKey(ConfirmBetRequest confirmBetRequest)
 	{
 		foreach (var transaction in confirmBetRequest.message.Txns)
@@ -103,7 +122,7 @@ public class MemoryDb(IMemoryCache memoryCache) : IMemoryDb
 				savedTicket[0].winlost_amount = transaction.Payout;
 				savedTicket[0].winlost_datetime = transaction.WinlostDate;
 				savedTicket[0].ticket_extra_status = transaction.ExtraStatus;
-				
+
 				SettledTicket.Add(savedTicket[0]);
 
 				PendingTicket.RemoveAll(ticket => ticket.trans_id == savedTicket[0].trans_id);

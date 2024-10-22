@@ -64,7 +64,9 @@ namespace SabaSimulator.API.Controllers
 			ConfirmBetParlayRequest source)
 		{
 
-			return await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+			var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+			_memoryDb.SetBetDetailKey(source);
+			return result;
 		}
 
 		[HttpPost("ConfirmBet")]
