@@ -82,6 +82,7 @@ public class MemoryDb(IMemoryCache memoryCache) : IMemoryDb
 				transaction_time = confirmBetRequest.message.TransactionTime,
 				stake = transaction.ActualAmount,
 				ticket_status = "running",
+				odds = transaction.Odds,
 			});
 		}
 	}
@@ -99,6 +100,10 @@ public class MemoryDb(IMemoryCache memoryCache) : IMemoryDb
 			{
 				savedTicket[0].ticket_status = transaction.Status;
 				savedTicket[0].settlement_time = transaction.SettlementTime;
+				savedTicket[0].winlost_amount = transaction.Payout;
+				savedTicket[0].winlost_datetime = transaction.WinlostDate;
+				savedTicket[0].ticket_extra_status = transaction.ExtraStatus;
+				
 				SettledTicket.Add(savedTicket[0]);
 
 				PendingTicket.RemoveAll(ticket => ticket.trans_id == savedTicket[0].trans_id);

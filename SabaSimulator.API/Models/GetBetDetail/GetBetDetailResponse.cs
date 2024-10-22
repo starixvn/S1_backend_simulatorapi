@@ -58,7 +58,7 @@ public class BetDetail : ISabaBet
 	public decimal winlost_amount { get; set; }
 	public decimal after_amount { get; set; }
 	public int currency { get; set; }
-	public DateTime winlost_datetime { get; set; }
+	public string winlost_datetime { get; set; }
 	public int? odds_type { get; set; }
 	public string bet_team { get; set; }
 	public string isLucky { get; set; }
