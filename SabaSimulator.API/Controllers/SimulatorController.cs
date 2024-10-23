@@ -63,7 +63,6 @@ namespace SabaSimulator.API.Controllers
 			[FromServices] IGetService<ConfirmBetParlayRequest, ConfirmBetParlayResult> service,
 			ConfirmBetParlayRequest source)
 		{
-
 			var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
 			_memoryDb.SetBetDetailKey(source);
 			return result;
@@ -114,7 +113,7 @@ namespace SabaSimulator.API.Controllers
 		ResettleRequest source)
 		{
 			var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
-
+			_memoryDb.SetBetDetailKey(source);
 			return result;
 		}
 
@@ -124,6 +123,7 @@ namespace SabaSimulator.API.Controllers
 		UnsettleRequest source)
 		{
 			var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+			_memoryDb.SetBetDetailKey(source);
 
 			return result;
 		}
@@ -160,6 +160,7 @@ namespace SabaSimulator.API.Controllers
 		SabaPlusPlaceBetAndSettleRequest source)
 		{
 			var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+
 			return result;
 		}
 

@@ -2,10 +2,13 @@
 using System.Net.Sockets;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
+using SabaSimulator.API.Models.CancelBet;
 using SabaSimulator.API.Models.ConfirmBet;
 using SabaSimulator.API.Models.ConfirmbetParlay;
 using SabaSimulator.API.Models.GetBetDetail;
+using SabaSimulator.API.Models.Resettle;
 using SabaSimulator.API.Models.Settle;
+using SabaSimulator.API.Models.Unsettle;
 
 namespace SabaSimulator.API.Helper;
 
@@ -14,6 +17,10 @@ public interface IMemoryDb
 	public void SetBetDetailKey(ConfirmBetRequest confirmBetRequest);
 
 	void SetBetDetailKey(ConfirmBetParlayRequest source);
+
+	void SetBetDetailKey(ResettleRequest source);
+
+	void SetBetDetailKey(UnsettleRequest source);
 
 	public void SetBetDetailKey(SettleRequest settleRequest);
 
@@ -106,26 +113,58 @@ public class MemoryDb(IMemoryCache memoryCache) : IMemoryDb
 		}
 	}
 
-	public void SetBetDetailKey(SettleRequest settleRequest)
+	public void SetBetDetailKey(SettleRequest request)
 	{
 		var placeBetTickets = JsonSerializer.Deserialize<List<BetDetail>>(JsonSerializer.Serialize(PlacebetTicket)) ?? [];
 		var pendingTickets = JsonSerializer.Deserialize<List<BetDetail>>(JsonSerializer.Serialize(PendingTicket)) ?? [];
 
 		placeBetTickets.AddRange(pendingTickets);
-		foreach (var transaction in settleRequest.message.Txns)
+		foreach (var transaction in request.message.Txns)
 		{
 			var savedTicket = placeBetTickets.FindAll(ticket => ticket.trans_id.Equals(transaction.TxId));
 			if (savedTicket.Count != 0)
 			{
 				savedTicket[0].ticket_status = transaction.Status;
+				savedTicket[0].ticket_extra_status = transaction.ExtraStatus;
 				savedTicket[0].settlement_time = transaction.SettlementTime;
 				savedTicket[0].winlost_amount = transaction.Payout;
 				savedTicket[0].winlost_datetime = transaction.WinlostDate;
-				savedTicket[0].ticket_extra_status = transaction.ExtraStatus;
 
 				SettledTicket.Add(savedTicket[0]);
+			}
+		}
+	}
 
-				PendingTicket.RemoveAll(ticket => ticket.trans_id == savedTicket[0].trans_id);
+	public void SetBetDetailKey(ResettleRequest request)
+	{
+		foreach (var transaction in request.message.Txns)
+		{
+			var savedTicket = PendingTicket.FindAll(ticket => ticket.trans_id.Equals(transaction.TxId));
+			if (savedTicket.Count != 0)
+			{
+				savedTicket[0].ticket_status = transaction.Status;
+				savedTicket[0].ticket_extra_status = transaction.ExtraStatus;
+				savedTicket[0].settlement_time = transaction.SettlementTime;
+				savedTicket[0].winlost_amount = transaction.Payout;
+				savedTicket[0].winlost_datetime = transaction.WinlostDate;
+
+				SettledTicket.Add(savedTicket[0]);
+			}
+		}
+	}
+
+	public void SetBetDetailKey(UnsettleRequest request)
+	{
+		foreach (var transaction in request.message.Txns)
+		{
+			var savedTicket = PendingTicket.FindAll(ticket => ticket.trans_id.Equals(transaction.TxId));
+			if (savedTicket.Count != 0)
+			{
+				savedTicket[0].ticket_status = "running";
+				savedTicket[0].ticket_extra_status = transaction.ExtraStatus;
+				savedTicket[0].stake = transaction.CreditAmount;
+
+				SettledTicket.Add(savedTicket[0]);
 			}
 		}
 	}
