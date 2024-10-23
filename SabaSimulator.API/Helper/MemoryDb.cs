@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics;
+using System.Text.Json;
 using SabaSimulator.API.Models.ConfirmBet;
 using SabaSimulator.API.Models.ConfirmbetParlay;
 using SabaSimulator.API.Models.GetBetDetail;
@@ -46,6 +47,14 @@ public class MemoryDb() : IMemoryDb
 
 		var confirmBetTickets = JsonSerializer.Deserialize<List<BetDetail>>(JsonSerializer.Serialize(ConfirmBetTicket)) ?? [];
 		var settleBetTickets = JsonSerializer.Deserialize<List<BetDetail>>(JsonSerializer.Serialize(SettledTicket)) ?? [];
+
+		Debug.WriteLine("Last Version Key: " + LastVersionKey);
+		Debug.WriteLine("PlacebetTicket:");
+		Debug.WriteLine(JsonSerializer.Serialize(PlacebetTicket));
+		Debug.WriteLine("ConfirmBetTicket:");
+		Debug.WriteLine(JsonSerializer.Serialize(ConfirmBetTicket));
+		Debug.WriteLine("SettledTicket:");
+		Debug.WriteLine(JsonSerializer.Serialize(SettledTicket));
 
 		return GenerateRespone(confirmBetTickets.Concat(settleBetTickets)
 													 .Where(bet => bet.version_key >= LastVersionKey)
