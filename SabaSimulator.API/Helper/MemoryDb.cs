@@ -129,7 +129,7 @@ public class MemoryDb() : IMemoryDb
 				savedTicket.version_key = (int)LastVersionKey;
 				savedTicket.ticket_status = transaction.Status;
 				savedTicket.ticket_extra_status = transaction.ExtraStatus;
-				savedTicket.settlement_time = DateTime.Parse(transaction.SettlementTime).ToUniversalTime().ToString();
+				savedTicket.settlement_time = DateTime.Parse(transaction.SettlementTime).ToUniversalTime().AddHours(-4).ToString();
 				savedTicket.winlost_amount = transaction.Payout;
 				savedTicket.winlost_datetime = transaction.WinlostDate;
 
@@ -151,7 +151,7 @@ public class MemoryDb() : IMemoryDb
 				savedTicket.version_key = (int)LastVersionKey;
 				savedTicket.ticket_status = transaction.Status;
 				savedTicket.ticket_extra_status = transaction.ExtraStatus;
-				savedTicket.settlement_time = DateTime.Parse(transaction.SettlementTime).ToUniversalTime().ToString();
+				savedTicket.settlement_time = DateTime.Parse(transaction.SettlementTime).ToUniversalTime().AddHours(-4).ToString();
 				savedTicket.winlost_amount = transaction.Payout;
 				savedTicket.winlost_datetime = string.IsNullOrEmpty(transaction.WinlostDate) ? string.Empty : transaction.WinlostDate;
 			}
@@ -216,9 +216,9 @@ public class MemoryDb() : IMemoryDb
 				ticket.home_score = match.HomeScore;
 				ticket.away_score = match.AwayScore;
 				ticket.betchoice = match.BetChoice;
-				ticket.leaguename = new List<Leaguename> { new Leaguename { name = match.LeagueName } };
-				ticket.sportname = new List<Sportname> { new Sportname { name = match.SportTypeName } };
-				ticket.bettypename = new List<Bettypename> { new Bettypename { name = match.BetTypeName } };
+				ticket.leaguename = new List<Leaguename> { new Leaguename { name = match.LeagueName, lang = "en" } };
+				ticket.sportname = new List<Sportname> { new Sportname { name = match.SportTypeName, lang = "en" } };
+				ticket.bettypename = new List<Bettypename> { new Bettypename { name = match.BetTypeName, lang = "en" } };
 			}
 
 			PlacebetTicket.Add(ticket);
@@ -253,9 +253,9 @@ public class MemoryDb() : IMemoryDb
 			betchoice = request.message.BetChoice,
 			original_stake = request.message.BetAmount,
 			winlost_datetime = string.Empty,
-			leaguename = new List<Leaguename> { new Leaguename { name = request.message.LeagueName } },
-			sportname = new List<Sportname> { new Sportname { name = request.message.SportTypeName } },
-			bettypename = new List<Bettypename> { new Bettypename { name = request.message.BetTypeName } },
+			leaguename = new List<Leaguename> { new Leaguename { name = request.message.LeagueName, lang = "en" } },
+			sportname = new List<Sportname> { new Sportname { name = request.message.SportTypeName, lang = "en" } },
+			bettypename = new List<Bettypename> { new Bettypename { name = request.message.BetTypeName, lang = "en" } },
 		});
 	}
 
@@ -273,11 +273,10 @@ public class MemoryDb() : IMemoryDb
 				ticket.version_key = (int)LastVersionKey;
 				ticket.trans_id = transaction.TxId;
 				ticket.vendor_member_id = request.message.UserId;
-				ticket.transaction_time = DateTime.Parse(request.message.TransactionTime).ToUniversalTime().ToString();
+				ticket.transaction_time = DateTime.Parse(request.message.TransactionTime).ToUniversalTime().AddHours(-4).ToString();
 				ticket.stake = transaction.ActualAmount;
 				ticket.ticket_status = "running";
 				ticket.odds = transaction.Odds ?? 0;
-				ticket.winlost_datetime = transaction.WinlostDate;
 				ConfirmBetTicket.Add(ticket);
 			}
 			catch (Exception ex)
@@ -299,7 +298,7 @@ public class MemoryDb() : IMemoryDb
 				ticket.version_key = (int)LastVersionKey;
 				ticket.trans_id = transaction.TxId;
 				ticket.vendor_member_id = request.message.UserId;
-				ticket.transaction_time = DateTime.Parse(request.message.TransactionTime).ToUniversalTime().ToString();
+				ticket.transaction_time = DateTime.Parse(request.message.TransactionTime).ToUniversalTime().AddHours(-4).ToString();
 				ticket.stake = transaction.ActualAmount;
 				ticket.ticket_status = "running";
 				ticket.odds = transaction.Odds;
