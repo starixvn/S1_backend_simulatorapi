@@ -29,6 +29,8 @@ public interface IMemoryDb
 	void SetBetDetailKey(SettleRequest settleRequest);
 
 	GetBetDetailResponse GetBetDetail(GetBetDetailRequest inputs);
+
+	GetBetDetailResponse UpdateBetDetail(BetDetail betDetail);
 }
 
 public class MemoryDb() : IMemoryDb
@@ -60,31 +62,61 @@ public class MemoryDb() : IMemoryDb
 			LastVersionKey = request.version_key + 1;
 		}
 
-		return GenerateRespone(confirmBetTickets.Concat(settleBetTickets)
+		return GenerateResponse(confirmBetTickets.Concat(settleBetTickets)
 													 .Where(bet => bet.version_key >= request.version_key)
 													 .GroupBy(bet => bet.trans_id)
 													 .SelectMany(group => group)
 													 .ToList());
 	}
 
-	private GetBetDetailResponse GenerateRespone(List<BetDetail> betDetails)
+	private GetBetDetailResponse GenerateResponse(List<BetDetail> betDetails)
 	{
 		var resposne = new GetBetDetailResponse()
 		{
 			ErrorCode = 0,
-			Message = "Success"
-		};
-
-		resposne.Data = new()
-		{
-			LastVersionKey = LastVersionKey,
-			BetDetails = betDetails,
-			BetNumberDetails = [],
-			BetVirtualSportDetails = [],
-			BetCasinoDetails = [],
+			Message = "Success",
+			Data = new()
+			{
+				LastVersionKey = LastVersionKey,
+				BetDetails = betDetails,
+				BetNumberDetails = [],
+				BetVirtualSportDetails = [],
+				BetCasinoDetails = [],
+			}
 		};
 
 		return resposne;
+	}
+
+	public GetBetDetailResponse UpdateBetDetail(BetDetail betDetail)
+	{
+		var confirmBetTickets = JsonSerializer.Deserialize<List<BetDetail>>(JsonSerializer.Serialize(ConfirmBetTicket)) ?? [];
+		var settleBetTickets = JsonSerializer.Deserialize<List<BetDetail>>(JsonSerializer.Serialize(SettledTicket)) ?? [];
+
+		var ticket = ConfirmBetTicket.FirstOrDefault(x => x.trans_id == betDetail.trans_id);
+
+		if (ticket is null)
+		{
+			ticket = SettledTicket.FirstOrDefault(x => x.trans_id == betDetail.trans_id);
+		}
+
+		if (ticket is null)
+		{
+			return GenerateResponse(confirmBetTickets.Concat(settleBetTickets)
+													 .Where(bet => bet.version_key >= LastVersionKey)
+													 .GroupBy(bet => bet.trans_id)
+													 .SelectMany(group => group)
+													 .ToList());
+		}
+
+		SettledTicket.Add(betDetail);
+		IsUpdated = true;
+
+		return GenerateResponse(confirmBetTickets.Concat(settleBetTickets).Concat([betDetail])
+										 .Where(bet => bet.version_key >= LastVersionKey)
+										 .GroupBy(bet => bet.trans_id)
+										 .SelectMany(group => group)
+										 .ToList());
 	}
 
 	public void SetBetDetailKey(SettleRequest request)

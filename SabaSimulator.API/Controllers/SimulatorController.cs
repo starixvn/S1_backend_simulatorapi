@@ -99,6 +99,12 @@ namespace SabaSimulator.API.Controllers
 			return Ok(_memoryDb.GetBetDetail(source));
 		}
 
+		[HttpPost("UpdateBetDetail")]
+		public IActionResult UpdateBetDetail([FromBody] BetDetail source)
+		{
+			return Ok(_memoryDb.UpdateBetDetail(source));
+		}
+
 		[HttpPost("settle")]
 		public async Task<SettleResult> Settle(
 		[FromServices] IGetService<SettleRequest, SettleResult> service,
