@@ -46,7 +46,9 @@ namespace SabaSimulator.API.Controllers
 			[FromServices] IGetService<PlaceBetParlayRequest, PlaceBetParlayResult> service,
 			PlaceBetParlayRequest source)
 		{
-			return await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+			var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+			_memoryDb.SetBetDetailKey(source);
+			return result;
 		}
 
 		[HttpPost("PlaceBet")]
