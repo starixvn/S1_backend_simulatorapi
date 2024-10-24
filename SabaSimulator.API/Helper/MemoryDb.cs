@@ -98,25 +98,29 @@ public class MemoryDb() : IMemoryDb
 		if (ticket is null)
 		{
 			ticket = SettledTicket.FirstOrDefault(x => x.trans_id == betDetail.trans_id);
+			if (ticket is null)
+			{
+				return GenerateResponse(confirmBetTickets.Concat(settleBetTickets)
+														 .Where(bet => bet.version_key >= LastVersionKey)
+														 .GroupBy(bet => bet.trans_id)
+														 .SelectMany(group => group)
+														 .ToList());
+			}
+
+			betDetail.version_key = (int)LastVersionKey;
+			SettledTicket.Remove(ticket);
+			SettledTicket.Add(betDetail);
+			IsUpdated = true;
+
+			return GenerateResponse([SettledTicket.Find(x => x.trans_id == betDetail.trans_id)]);
 		}
 
-		if (ticket is null)
-		{
-			return GenerateResponse(confirmBetTickets.Concat(settleBetTickets)
-													 .Where(bet => bet.version_key >= LastVersionKey)
-													 .GroupBy(bet => bet.trans_id)
-													 .SelectMany(group => group)
-													 .ToList());
-		}
-
-		SettledTicket.Add(betDetail);
+		betDetail.version_key = (int)LastVersionKey;
+		ConfirmBetTicket.Remove(ticket);
+		ConfirmBetTicket.Add(betDetail);
 		IsUpdated = true;
 
-		return GenerateResponse(confirmBetTickets.Concat(settleBetTickets).Concat([betDetail])
-										 .Where(bet => bet.version_key >= LastVersionKey)
-										 .GroupBy(bet => bet.trans_id)
-										 .SelectMany(group => group)
-										 .ToList());
+		return GenerateResponse([ConfirmBetTicket.Find(x => x.trans_id == betDetail.trans_id)]);
 	}
 
 	public void SetBetDetailKey(SettleRequest request)
