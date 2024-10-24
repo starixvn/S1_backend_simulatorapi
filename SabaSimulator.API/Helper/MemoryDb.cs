@@ -131,7 +131,7 @@ public class MemoryDb() : IMemoryDb
 				savedTicket.ticket_extra_status = transaction.ExtraStatus;
 				savedTicket.settlement_time = DateTime.Parse(transaction.SettlementTime).ToUniversalTime().AddHours(-4).ToString();
 				savedTicket.winlost_amount = transaction.Payout;
-				savedTicket.winlost_datetime = transaction.WinlostDate;
+				savedTicket.winlost_datetime = DateTime.Parse(transaction.WinlostDate).ToUniversalTime().AddHours(-4);
 
 				SettledTicket.Add(savedTicket);
 				ConfirmBetTicket.Remove(savedTicket);
@@ -153,7 +153,7 @@ public class MemoryDb() : IMemoryDb
 				savedTicket.ticket_extra_status = transaction.ExtraStatus;
 				savedTicket.settlement_time = DateTime.Parse(transaction.SettlementTime).ToUniversalTime().AddHours(-4).ToString();
 				savedTicket.winlost_amount = transaction.Payout;
-				savedTicket.winlost_datetime = string.IsNullOrEmpty(transaction.WinlostDate) ? string.Empty : transaction.WinlostDate;
+				savedTicket.winlost_datetime = DateTime.Parse(transaction.WinlostDate).ToUniversalTime().AddHours(-4);
 			}
 			catch (Exception ex) { Console.WriteLine(ex.ToString()); }
 		}
@@ -191,7 +191,6 @@ public class MemoryDb() : IMemoryDb
 				vendor_member_id = request.message.UserId,
 
 				original_stake = transaction.BetAmount,
-				winlost_datetime = DateTime.UnixEpoch.ToString()
 			};
 			foreach (var comboInfoDetail in transaction.Detail)
 			{
@@ -252,7 +251,6 @@ public class MemoryDb() : IMemoryDb
 			betfrom = request.message.BetFrom,
 			betchoice = request.message.BetChoice,
 			original_stake = request.message.BetAmount,
-			winlost_datetime = string.Empty,
 			leaguename = new List<Leaguename> { new Leaguename { name = request.message.LeagueName, lang = "en" } },
 			sportname = new List<Sportname> { new Sportname { name = request.message.SportTypeName, lang = "en" } },
 			bettypename = new List<Bettypename> { new Bettypename { name = request.message.BetTypeName, lang = "en" } },
@@ -302,7 +300,6 @@ public class MemoryDb() : IMemoryDb
 				ticket.stake = transaction.ActualAmount;
 				ticket.ticket_status = "running";
 				ticket.odds = transaction.Odds;
-				ticket.winlost_datetime = DateTime.UnixEpoch.ToString();
 				ConfirmBetTicket.Add(ticket);
 			}
 			catch (Exception ex) { Console.WriteLine(ex.ToString()); }
