@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using System.Text.Json;
-using Microsoft.Extensions.Caching.Memory;
+﻿using System.Text.Json;
 using SabaSimulator.API.Models.ConfirmBet;
 using SabaSimulator.API.Models.ConfirmbetParlay;
 using SabaSimulator.API.Models.GetBetDetail;
@@ -28,6 +26,8 @@ public interface IMemoryDb
 
 	void SetBetDetailKey(SettleRequest settleRequest);
 
+	void ClearTickets();
+
 	GetBetDetailResponse GetBetDetail(GetBetDetailRequest inputs);
 
 	GetBetDetailResponse UpdateBetDetail(BetDetail betDetail);
@@ -43,6 +43,13 @@ public class MemoryDb() : IMemoryDb
 	private List<BetDetail> PlacebetTicket = [];
 	private List<BetDetail> ConfirmBetTicket = [];
 	private List<BetDetail> SettledTicket = [];
+
+	public void ClearTickets()
+	{
+		PlacebetTicket = [];
+		ConfirmBetTicket = [];
+		SettledTicket = [];
+	}
 
 	public GetBetDetailResponse GetBetDetail(GetBetDetailRequest request)
 	{
@@ -127,20 +134,16 @@ public class MemoryDb() : IMemoryDb
 	{
 		foreach (var transaction in request.message.Txns)
 		{
-			try
-			{
-				var savedTicket = ConfirmBetTicket.Find(ticket => ticket.trans_id.Equals(transaction.TxId));
-				savedTicket.version_key = (int)LastVersionKey;
-				savedTicket.ticket_status = transaction.Status;
-				savedTicket.ticket_extra_status = transaction.ExtraStatus;
-				savedTicket.settlement_time = DateTime.Parse(transaction.SettlementTime).ToUniversalTime().AddHours(-4).ToString();
-				savedTicket.winlost_amount = transaction.Payout;
-				savedTicket.winlost_datetime = DateTime.Parse(transaction.WinlostDate).ToUniversalTime().AddHours(-4);
+			var savedTicket = ConfirmBetTicket.Find(ticket => ticket.trans_id.Equals(transaction.TxId));
+			savedTicket.version_key = (int)LastVersionKey;
+			savedTicket.ticket_status = transaction.Status;
+			savedTicket.ticket_extra_status = transaction.ExtraStatus;
+			savedTicket.settlement_time = DateTime.Parse(transaction.SettlementTime).ToUniversalTime().AddHours(-4).ToString();
+			savedTicket.winlost_datetime = DateTime.Parse(transaction.WinlostDate).ToUniversalTime().AddHours(-4);
+			savedTicket.winlost_amount = transaction.Payout - savedTicket.stake;
 
-				SettledTicket.Add(savedTicket);
-				ConfirmBetTicket.Remove(savedTicket);
-			}
-			catch (Exception ex) { Console.WriteLine(ex.ToString()); }
+			SettledTicket.Add(savedTicket);
+			ConfirmBetTicket.Remove(savedTicket);
 		}
 		IsUpdated = true;
 	}
@@ -149,17 +152,13 @@ public class MemoryDb() : IMemoryDb
 	{
 		foreach (var transaction in request.message.Txns)
 		{
-			try
-			{
-				var savedTicket = SettledTicket.Find(ticket => ticket.trans_id.Equals(transaction.TxId));
-				savedTicket.version_key = (int)LastVersionKey;
-				savedTicket.ticket_status = transaction.Status;
-				savedTicket.ticket_extra_status = transaction.ExtraStatus;
-				savedTicket.settlement_time = DateTime.Parse(transaction.SettlementTime).ToUniversalTime().AddHours(-4).ToString();
-				savedTicket.winlost_amount = transaction.Payout;
-				savedTicket.winlost_datetime = DateTime.Parse(transaction.WinlostDate).ToUniversalTime().AddHours(-4);
-			}
-			catch (Exception ex) { Console.WriteLine(ex.ToString()); }
+			var savedTicket = SettledTicket.Find(ticket => ticket.trans_id.Equals(transaction.TxId));
+			savedTicket.version_key = (int)LastVersionKey;
+			savedTicket.ticket_status = transaction.Status;
+			savedTicket.ticket_extra_status = transaction.ExtraStatus;
+			savedTicket.settlement_time = DateTime.Parse(transaction.SettlementTime).ToUniversalTime().AddHours(-4).ToString();
+			savedTicket.winlost_datetime = DateTime.Parse(transaction.WinlostDate).ToUniversalTime().AddHours(-4);
+			savedTicket.winlost_amount = transaction.Payout - savedTicket.stake;
 		}
 		IsUpdated = true;
 	}
@@ -168,15 +167,11 @@ public class MemoryDb() : IMemoryDb
 	{
 		foreach (var transaction in request.message.Txns)
 		{
-			try
-			{
-				var savedTicket = SettledTicket.Find(ticket => ticket.trans_id.Equals(transaction.TxId));
-				SettledTicket.Remove(savedTicket);
+			var savedTicket = SettledTicket.Find(ticket => ticket.trans_id.Equals(transaction.TxId));
+			SettledTicket.Remove(savedTicket);
 
-				savedTicket.version_key = (int)LastVersionKey;
-				ConfirmBetTicket.Add(savedTicket);
-			}
-			catch (Exception ex) { Console.WriteLine(ex.ToString()); }
+			savedTicket.version_key = (int)LastVersionKey;
+			ConfirmBetTicket.Add(savedTicket);
 		}
 		IsUpdated = true;
 	}
@@ -195,6 +190,20 @@ public class MemoryDb() : IMemoryDb
 				vendor_member_id = request.message.UserId,
 
 				original_stake = transaction.BetAmount,
+				bet_type = 29,
+				bettypename = new List<Bettypename>
+				{
+					new ()
+					{
+						lang = "en",
+						name = "System Parlay"
+					},
+					new ()
+					{
+						lang = "cs",
+						name = "系统串关"
+					}
+				}
 			};
 			foreach (var comboInfoDetail in transaction.Detail)
 			{
@@ -245,7 +254,6 @@ public class MemoryDb() : IMemoryDb
 			bet_type = request.message.BetType,
 			odds = request.message.Odds,
 			stake = request.message.BetAmount,
-			discount_stake = request.message.ActualAmount,
 			transaction_time = request.message.BetTime,
 			currency = request.message.Currency,
 			odds_type = request.message.OddsType,
@@ -254,7 +262,7 @@ public class MemoryDb() : IMemoryDb
 			away_score = request.message.AwayScore,
 			betfrom = request.message.BetFrom,
 			betchoice = request.message.BetChoice,
-			original_stake = request.message.BetAmount,
+			winlost_amount = request.message.Odds < 0 ? request.message.Odds * request.message.BetAmount : -request.message.BetAmount,
 			leaguename = new List<Leaguename> { new Leaguename { name = request.message.LeagueName, lang = "en" } },
 			sportname = new List<Sportname> { new Sportname { name = request.message.SportTypeName, lang = "en" } },
 			bettypename = new List<Bettypename> { new Bettypename { name = request.message.BetTypeName, lang = "en" } },
@@ -274,11 +282,8 @@ public class MemoryDb() : IMemoryDb
 				var ticket = PlacebetTicket.Find(x => x.ref_id == transaction.RefId);
 				ticket.version_key = (int)LastVersionKey;
 				ticket.trans_id = transaction.TxId;
-				ticket.vendor_member_id = request.message.UserId;
 				ticket.transaction_time = DateTime.Parse(request.message.TransactionTime).ToUniversalTime().AddHours(-4).ToString();
-				ticket.stake = transaction.ActualAmount;
 				ticket.ticket_status = "running";
-				ticket.odds = transaction.Odds ?? 0;
 				ConfirmBetTicket.Add(ticket);
 			}
 			catch (Exception ex)
@@ -299,11 +304,8 @@ public class MemoryDb() : IMemoryDb
 				var ticket = PlacebetTicket.Find(x => x.ref_id == transaction.RefId);
 				ticket.version_key = (int)LastVersionKey;
 				ticket.trans_id = transaction.TxId;
-				ticket.vendor_member_id = request.message.UserId;
 				ticket.transaction_time = DateTime.Parse(request.message.TransactionTime).ToUniversalTime().AddHours(-4).ToString();
-				ticket.stake = transaction.ActualAmount;
 				ticket.ticket_status = "running";
-				ticket.odds = transaction.Odds;
 				ConfirmBetTicket.Add(ticket);
 			}
 			catch (Exception ex) { Console.WriteLine(ex.ToString()); }

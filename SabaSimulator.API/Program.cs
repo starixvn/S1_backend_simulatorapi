@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.HttpLogging;
+using SabaSimulator.API.CronJob;
 using SabaSimulator.API.DependencyInjection;
 using SabaSimulator.API.Services;
 
@@ -21,13 +22,15 @@ builder.Services
 builder.Services.AddHttpClient<ConfirmBetService>();
 builder.Services.AddHttpClient<CancelBetService>();
 builder.Services.AddHttpClient<PlaceBetService>();
-var app = builder.Build();
 
+builder.Services.AddHostedService<ClearMemoryDbJob>();
+
+var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+	app.UseSwagger();
+	app.UseSwaggerUI();
 }
 
 app.UseCors(x =>
@@ -42,4 +45,5 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/healthz");
 app.MapHealthChecks("/");
+
 app.Run();
