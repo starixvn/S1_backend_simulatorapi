@@ -40,21 +40,21 @@ public class MemoryDb() : IMemoryDb
 	private static long LastVersionKey = 0;
 	private static bool IsUpdated = false;
 
-	private List<BetDetail> PlacebetTicket = [];
-	private List<BetDetail> ConfirmBetTicket = [];
-	private List<BetDetail> SettledTicket = [];
+	private ConcurrentList<BetDetail> PlacebetTicket = new ConcurrentList<BetDetail>();
+	private ConcurrentList<BetDetail> ConfirmBetTicket = new ConcurrentList<BetDetail>();
+	private ConcurrentList<BetDetail> SettledTicket = new ConcurrentList<BetDetail>();
 
 	public void ClearTickets()
 	{
-		PlacebetTicket = [];
-		ConfirmBetTicket = [];
-		SettledTicket = [];
+		PlacebetTicket.Clear();
+		ConfirmBetTicket.Clear();
+		SettledTicket.Clear();
 	}
 
 	public GetBetDetailResponse GetBetDetail(GetBetDetailRequest request)
 	{
-		var confirmBetTickets = JsonSerializer.Deserialize<List<BetDetail>>(JsonSerializer.Serialize(ConfirmBetTicket)) ?? [];
-		var settleBetTickets = JsonSerializer.Deserialize<List<BetDetail>>(JsonSerializer.Serialize(SettledTicket)) ?? [];
+		var confirmBetTickets = JsonSerializer.Deserialize<List<BetDetail>>(JsonSerializer.Serialize(ConfirmBetTicket.GetData())) ?? [];
+		var settleBetTickets = JsonSerializer.Deserialize<List<BetDetail>>(JsonSerializer.Serialize(SettledTicket.GetData())) ?? [];
 
 		Console.WriteLine("Request Version Key: " + request.version_key);
 		Console.WriteLine("Last Version Key: " + LastVersionKey);

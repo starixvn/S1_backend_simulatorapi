@@ -29,7 +29,8 @@ namespace SabaSimulator.API.Controllers
 		private readonly HttpClient _httpClient;
 		private readonly IMemoryDb _memoryDb;
 		private readonly string _baseUrl;
-		private readonly string _simulatorUrl;
+		private readonly string _sabaPlusSimulatorUrl;
+		private readonly string _sabaSportSimulatorUrl;
 		private readonly string _sabaPlusUrl;
 
 		public SimulatorController(HttpClient httpClient, IConfiguration configuration, IMemoryDb memoryDb)
@@ -37,7 +38,8 @@ namespace SabaSimulator.API.Controllers
 			_httpClient = httpClient;
 			_baseUrl = configuration["BetService:BaseUrl"];
 			_sabaPlusUrl = configuration["BetService:BaseSabaPlusUrl"];
-			_simulatorUrl = configuration["BetService:SabaSimulatorUrl"];
+			_sabaPlusSimulatorUrl = configuration["BetService:SabaPlusSimulatorUrl"];
+			_sabaSportSimulatorUrl = configuration["BetService:SabaSportSimulatorUrl"];
 			_memoryDb = memoryDb;
 		}
 
@@ -145,6 +147,16 @@ namespace SabaSimulator.API.Controllers
 			var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
 
 			return result;
+		}
+
+		[HttpPost("getSabaUrl")]
+		public async Task<IActionResult> GetSabaUrl([FromQuery] string vendor_member_id)
+		{
+			return Ok(new
+			{
+				error_code = 0,
+				data = $"{_sabaSportSimulatorUrl}/${vendor_member_id}"
+			});
 		}
 
 		[HttpPost("sabaPlus-PlaceBet")]

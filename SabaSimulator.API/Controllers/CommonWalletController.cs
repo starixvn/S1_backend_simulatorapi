@@ -7,13 +7,13 @@ namespace SabaSimulator.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CommonWalletController :ControllerBase
+public class CommonWalletController : ControllerBase
 {
 	private readonly string _simulatorUrl;
 
 	public CommonWalletController(HttpClient httpClient, IConfiguration configuration)
 	{
-		_simulatorUrl = configuration["BetService:SabaSimulatorUrl"];
+		_simulatorUrl = configuration["BetService:SabaPlusSimulatorUrl"];
 	}
 
 	[HttpPost("LaunchGame")]
@@ -26,10 +26,9 @@ public class CommonWalletController :ControllerBase
 
 	[HttpPost("BetResultCheck")]
 	public async Task<BetResultCheckResponse> BetResultCheck([FromServices] IGetService<BetResultCheckRequest, BetResultCheckResponse> service,
-     BetResultCheckRequest source)
+	 BetResultCheckRequest source)
 	{
 		var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
 		return result;
 	}
-
 }
