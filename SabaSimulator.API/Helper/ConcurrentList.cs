@@ -1,92 +1,92 @@
-﻿namespace SabaSimulator.API.Helper;
+﻿using Microsoft.Extensions.Caching.Memory;
+
+namespace SabaSimulator.API.Helper;
 
 public class ConcurrentList<T>
 {
-	private List<T> _list;
-	private readonly object _lock = new object();
+	private readonly IMemoryCache _cache;
 
-	public ConcurrentList()
+	private readonly string _listKey;
+
+	public ConcurrentList(string listKey, IMemoryCache memoryCache)
 	{
-		_list = new List<T>();
+		_listKey = listKey;
+		_cache = memoryCache;
+		_cache.Set(listKey, new List<T>());
 	}
 
-	public List<T> GetData() => _list;
+	private List<T> GetList()
+	{
+		return _cache.Get(_listKey) as List<T>;
+	}
 
-	// Add an item to the list
 	public void Add(T item)
 	{
-		lock (_lock)
+		var list = GetList();
+		if (list != null)
 		{
-			_list.Add(item);
-		}
-	}
-
-	// Remove an item from the list
-	public bool Remove(T item)
-	{
-		lock (_lock)
-		{
-			return _list.Remove(item);
-		}
-	}
-
-	// Get an item at a specific index
-	public T Get(int index)
-	{
-		lock (_lock)
-		{
-			if (index >= 0 && index < _list.Count)
+			lock (list) // Ensure thread safety
 			{
-				return _list[index];
-			}
-			throw new IndexOutOfRangeException();
-		}
-	}
-
-	// Get the count of items in the list
-	public int Count
-	{
-		get
-		{
-			lock (_lock)
-			{
-				return _list.Count;
+				list.Add(item);
+				_cache.Set(_listKey, list);
 			}
 		}
 	}
 
-	// Iterate over the list safely
-	public IEnumerable<T> GetAll()
+	public void Remove(T item)
 	{
-		lock (_lock)
+		var list = GetList();
+		if (list != null)
 		{
-			return new List<T>(_list);
+			lock (list) // Ensure thread safety
+			{
+				list.Remove(item);
+				_cache.Set(_listKey, list);
+			}
 		}
 	}
 
-	// Clear all items from the list
+	public List<T> GetAll()
+	{
+		var list = GetList();
+		return list != null ? new List<T>(list) : new List<T>();
+	}
+
 	public void Clear()
 	{
-		lock (_lock)
+		var list = GetList();
+		if (list != null)
 		{
-			_list.Clear();
+			lock (list) // Ensure thread safety
+			{
+				list.Clear();
+				_cache.Set(_listKey, list);
+			}
 		}
 	}
 
 	public T Find(Func<T, bool> predicate)
 	{
-		lock (_lock)
+		var list = GetList();
+		lock (list)
 		{
-			return _list.FirstOrDefault(predicate);
+			return list.FirstOrDefault(predicate);
 		}
 	}
 
 	// Get the first item that matches a given predicate, or default if none found
 	public T FirstOrDefault(Func<T, bool> predicate)
 	{
-		lock (_lock)
+		var list = GetList();
+		lock (list)
 		{
-			return _list.FirstOrDefault(predicate);
+			return list.FirstOrDefault(predicate);
 		}
+	}
+
+	public int Count()
+	{
+		var list = GetList();
+		return list?.Count ?? 0;
 	}
 }
