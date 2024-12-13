@@ -220,6 +220,8 @@ public class MemoryDb : IMemoryDb
 
 				if (singleBetDetail is not null)
 				{
+					ticket.stake = transaction.BetAmount;
+
 					var match = request.message.TicketDetail.Find(x => x.MatchId == singleBetDetail.MatchId);
 					ticket.league_id = match.LeagueId;
 					ticket.match_id = match.MatchId;
@@ -233,9 +235,9 @@ public class MemoryDb : IMemoryDb
 					ticket.home_score = match.HomeScore;
 					ticket.away_score = match.AwayScore;
 					ticket.betchoice = match.BetChoice;
-					ticket.leaguename = new List<Leaguename> { new Leaguename { name = match.LeagueName, lang = "en" } };
-					ticket.sportname = new List<Sportname> { new Sportname { name = match.SportTypeName, lang = "en" } };
-					ticket.bettypename = new List<Bettypename> { new Bettypename { name = match.BetTypeName, lang = "en" } };
+					ticket.leaguename = [new Leaguename { name = match.LeagueName, lang = "en" }];
+					ticket.sportname = [new Sportname { name = match.SportTypeName, lang = "en" }];
+					ticket.bettypename = [new Bettypename { name = match.BetTypeName, lang = "en" }];
 					_placebetTicket.Add(ticket);
 					continue;
 				}

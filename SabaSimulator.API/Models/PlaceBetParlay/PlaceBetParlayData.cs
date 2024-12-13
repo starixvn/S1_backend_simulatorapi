@@ -97,14 +97,15 @@ public class ComboInfoDetailConverter : JsonConverter<List<ComboInfoDetail>>
 
 		foreach (var element in jsonArray.EnumerateArray())
 		{
-			if (element.TryGetProperty("matchId", out _))
+			// TODO: Remove smell code
+			if (element.TryGetProperty("matchId", out _) || element.TryGetProperty("MatchId", out _))
 			{
 				var singleBet = JsonSerializer.Deserialize<SingleBetDetail>(element.GetRawText(), options);
 
 				if (singleBet != null)
 					details.Add(singleBet);
 			}
-			else if (element.TryGetProperty("type", out _))
+			else if (element.TryGetProperty("Type", out _) || element.TryGetProperty("Type", out _))
 			{
 				var parlay = JsonSerializer.Deserialize<ParlayDetail>(element.GetRawText(), options);
 
