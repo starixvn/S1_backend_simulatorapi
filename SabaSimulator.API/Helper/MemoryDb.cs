@@ -184,11 +184,11 @@ public class MemoryDb() : IMemoryDb
 		{
 			var ticket = new BetDetail()
 			{
+				//TODO: Double check later
+				operator_id = "Starix1SW",
+				winlost_amount = -transaction.BetAmount,
 				ref_id = transaction.RefId,
-
-				operator_id = request.message.OperationId,
 				vendor_member_id = request.message.UserId,
-
 				original_stake = transaction.BetAmount,
 				bet_type = 29,
 				bettypename = new List<Bettypename>
@@ -207,30 +207,36 @@ public class MemoryDb() : IMemoryDb
 			};
 			foreach (var comboInfoDetail in transaction.Detail)
 			{
-				var ticketDetail = comboInfoDetail as SingleBetDetail;
+				var singleBetDetail = comboInfoDetail as SingleBetDetail;
 
-				if (ticketDetail is null)
+				if (singleBetDetail is not null)
 				{
+					var match = request.message.TicketDetail.Find(x => x.MatchId == singleBetDetail.MatchId);
+					ticket.league_id = match.LeagueId;
+					ticket.match_id = match.MatchId;
+					ticket.home_id = match.HomeId;
+					ticket.away_id = match.AwayId;
+					ticket.match_datetime = match.MatchDateTime;
+					ticket.sport_type = match.SportType;
+					ticket.bet_type = match.BetType;
+					ticket.odds_type = match.OddsType;
+					ticket.bet_team = match.BetTeam;
+					ticket.home_score = match.HomeScore;
+					ticket.away_score = match.AwayScore;
+					ticket.betchoice = match.BetChoice;
+					ticket.leaguename = new List<Leaguename> { new Leaguename { name = match.LeagueName, lang = "en" } };
+					ticket.sportname = new List<Sportname> { new Sportname { name = match.SportTypeName, lang = "en" } };
+					ticket.bettypename = new List<Bettypename> { new Bettypename { name = match.BetTypeName, lang = "en" } };
 					continue;
 				}
 
-				var match = request.message.TicketDetail.Find(x => x.MatchId == ticketDetail.MatchId);
-				ticket.league_id = match.LeagueId;
-				ticket.match_id = match.MatchId;
-				ticket.home_id = match.HomeId;
-				ticket.away_id = match.AwayId;
-				ticket.match_datetime = match.MatchDateTime;
-				ticket.sport_type = match.SportType;
-				ticket.bet_type = match.BetType;
-				ticket.odds = match.Odds;
-				ticket.odds_type = match.OddsType;
-				ticket.bet_team = match.BetTeam;
-				ticket.home_score = match.HomeScore;
-				ticket.away_score = match.AwayScore;
-				ticket.betchoice = match.BetChoice;
-				ticket.leaguename = new List<Leaguename> { new Leaguename { name = match.LeagueName, lang = "en" } };
-				ticket.sportname = new List<Sportname> { new Sportname { name = match.SportTypeName, lang = "en" } };
-				ticket.bettypename = new List<Bettypename> { new Bettypename { name = match.BetTypeName, lang = "en" } };
+				var parlayBetDetail = comboInfoDetail as ParlayDetail;
+				if (parlayBetDetail != null)
+				{
+					ticket.odds = parlayBetDetail.Odds ?? 0;
+					ticket.stake = parlayBetDetail.Stake;
+					ticket.bet_team = parlayBetDetail.Type.ToString();
+				}
 			}
 
 			PlacebetTicket.Add(ticket);
