@@ -182,16 +182,18 @@ public class MemoryDb() : IMemoryDb
 	{
 		foreach (var transaction in request.message.Txns)
 		{
-			var ticket = new BetDetail()
+			foreach (var comboInfoDetail in transaction.Detail)
 			{
-				//TODO: Double check later
-				operator_id = "Starix1SW",
-				winlost_amount = -transaction.BetAmount,
-				ref_id = transaction.RefId,
-				vendor_member_id = request.message.UserId,
-				original_stake = transaction.BetAmount,
-				bet_type = 29,
-				bettypename = new List<Bettypename>
+				var ticket = new BetDetail()
+				{
+					//TODO: Double check later
+					operator_id = "Starix1SW",
+					winlost_amount = -transaction.BetAmount,
+					ref_id = transaction.RefId,
+					vendor_member_id = request.message.UserId,
+					original_stake = transaction.BetAmount,
+					bet_type = 29,
+					bettypename = new List<Bettypename>
 				{
 					new ()
 					{
@@ -204,9 +206,8 @@ public class MemoryDb() : IMemoryDb
 						name = "系统串关"
 					}
 				}
-			};
-			foreach (var comboInfoDetail in transaction.Detail)
-			{
+				};
+
 				var singleBetDetail = comboInfoDetail as SingleBetDetail;
 
 				if (singleBetDetail is not null)
@@ -227,6 +228,7 @@ public class MemoryDb() : IMemoryDb
 					ticket.leaguename = new List<Leaguename> { new Leaguename { name = match.LeagueName, lang = "en" } };
 					ticket.sportname = new List<Sportname> { new Sportname { name = match.SportTypeName, lang = "en" } };
 					ticket.bettypename = new List<Bettypename> { new Bettypename { name = match.BetTypeName, lang = "en" } };
+					PlacebetTicket.Add(ticket);
 					continue;
 				}
 
@@ -236,10 +238,10 @@ public class MemoryDb() : IMemoryDb
 					ticket.odds = parlayBetDetail.Odds ?? 0;
 					ticket.stake = parlayBetDetail.Stake;
 					ticket.bet_team = parlayBetDetail.Type.ToString();
+					PlacebetTicket.Add(ticket);
+					continue;
 				}
 			}
-
-			PlacebetTicket.Add(ticket);
 		}
 	}
 
