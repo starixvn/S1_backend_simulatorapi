@@ -25,7 +25,6 @@ builder.Services.AddRefitClient<ISabaSportApi>()
 	.ConfigureHttpClient(client =>
 	{
 		client.BaseAddress = new Uri(builder.Configuration["BetService:BaseUrl"]!);
-		client.Timeout = TimeSpan.FromMinutes(5);
 	});
 
 builder.Services.AddHttpClient<SabaPlusEndGameService>();
