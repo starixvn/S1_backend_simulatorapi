@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.HttpLogging;
+using Refit;
+using SabaSimulator.API.ApiClient;
 using SabaSimulator.API.CronJob;
 using SabaSimulator.API.DependencyInjection;
 using SabaSimulator.API.Services;
@@ -19,15 +21,13 @@ builder.Services
 	.AddHttpLogging(logging => logging.LoggingFields = HttpLoggingFields.All)
 	.AddHealthChecks();
 
-builder.Services.AddHttpClient<BalanceService>();
-builder.Services.AddHttpClient<CancelBetService>();
-builder.Services.AddHttpClient<ConfirmBetService>();
-builder.Services.AddHttpClient<ConfirmBetparlayService>();
-builder.Services.AddHttpClient<PlaceBetService>();
-builder.Services.AddHttpClient<PlaceBetParlayService>();
-builder.Services.AddHttpClient<UnsettleService>();
-builder.Services.AddHttpClient<ResettleService>();
-builder.Services.AddHttpClient<SettleService>();
+builder.Services.AddRefitClient<ISabaSportApi>()
+	.ConfigureHttpClient(client =>
+	{
+		client.BaseAddress = new Uri(builder.Configuration["BetService:BaseUrl"]!);
+		client.Timeout = TimeSpan.FromMinutes(5);
+	});
+
 builder.Services.AddHttpClient<SabaPlusEndGameService>();
 builder.Services.AddHttpClient<SabaPlusFreeSpinService>();
 builder.Services.AddHttpClient<SabaPlusPlaceBetAndSettleService>();

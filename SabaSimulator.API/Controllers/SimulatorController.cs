@@ -19,6 +19,7 @@ using SabaSimulator.API.Models.VoidGame;
 using SabaSimulator.API.Models.FreeSpin;
 using SabaSimulator.API.Helper;
 using SabaSimulator.API.Models.GetBetDetail;
+using SabaSimulator.API.ApiClient;
 
 namespace SabaSimulator.API.Controllers
 {
@@ -26,6 +27,8 @@ namespace SabaSimulator.API.Controllers
 	[ApiController]
 	public class SimulatorController : ControllerBase
 	{
+		private readonly ISabaSportApi _sabaSportApi;
+
 		private readonly HttpClient _httpClient;
 		private readonly IMemoryDb _memoryDb;
 		private readonly string _baseUrl;
@@ -33,8 +36,10 @@ namespace SabaSimulator.API.Controllers
 		private readonly string _sabaSportSimulatorUrl;
 		private readonly string _sabaPlusUrl;
 
-		public SimulatorController(HttpClient httpClient, IConfiguration configuration, IMemoryDb memoryDb)
+		public SimulatorController(ISabaSportApi sabaSportApi, HttpClient httpClient, IConfiguration configuration, IMemoryDb memoryDb)
 		{
+			_sabaSportApi = sabaSportApi;
+
 			_httpClient = httpClient;
 			_baseUrl = configuration["BetService:BaseUrl"];
 			_sabaPlusUrl = configuration["BetService:BaseSabaPlusUrl"];
@@ -44,35 +49,29 @@ namespace SabaSimulator.API.Controllers
 		}
 
 		[HttpPost("PlaceBetParlay")]
-		public async Task<PlaceBetParlayResult> PlaceBetParlay(
-			[FromServices] IGetService<PlaceBetParlayRequest, PlaceBetParlayResult> service,
-			PlaceBetParlayRequest source)
+		public async Task<PlaceBetParlayResult> PlaceBetParlay(PlaceBetParlayRequest source)
 		{
-			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
-			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
+			var result = await _sabaSportApi.PlaceBetParlay(source);
 			_memoryDb.SetBetDetailKey(source);
+
 			return result;
 		}
 
 		[HttpPost("PlaceBet")]
-		public async Task<PlaceBetResult> PlaceBet(
-			[FromServices] IGetService<PlaceBetRequest, PlaceBetResult> service,
-			PlaceBetRequest source)
+		public async Task<PlaceBetResult> PlaceBet(PlaceBetRequest source)
 		{
-			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
-			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
+			var result = await _sabaSportApi.PlaceBet(source);
 			_memoryDb.SetBetDetailKey(source);
+
 			return result;
 		}
 
 		[HttpPost("ConfirmBetParlay")]
-		public async Task<ConfirmBetParlayResult> ConfirmBetParlay(
-			[FromServices] IGetService<ConfirmBetParlayRequest, ConfirmBetParlayResult> service,
-			ConfirmBetParlayRequest source)
+		public async Task<ConfirmBetParlayResult> ConfirmBetParlay(ConfirmBetParlayRequest source)
 		{
-			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
-			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
+			var result = await _sabaSportApi.ConfirmBetParlay(source);
 			_memoryDb.SetBetDetailKey(source);
+
 			return result;
 		}
 
@@ -81,20 +80,16 @@ namespace SabaSimulator.API.Controllers
 		[FromServices] IGetService<ConfirmBetRequest, ConfirmBetResult> service,
 		ConfirmBetRequest source)
 		{
-			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
-			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
+			var result = await _sabaSportApi.ConfirmBet(source);
 			_memoryDb.SetBetDetailKey(source);
 
 			return result;
 		}
 
 		[HttpPost("CancelBet")]
-		public async Task<CancelBetResult> CancelBet(
-			[FromServices] IGetService<CancelBetRequest, CancelBetResult> service,
-			CancelBetRequest source)
+		public async Task<CancelBetResult> CancelBet(CancelBetRequest source)
 		{
-			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
-			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
+			var result = await _sabaSportApi.CancelBet(source);
 
 			return result;
 		}
@@ -113,35 +108,26 @@ namespace SabaSimulator.API.Controllers
 		}
 
 		[HttpPost("settle")]
-		public async Task<SettleResult> Settle(
-		[FromServices] IGetService<SettleRequest, SettleResult> service,
-		SettleRequest source)
+		public async Task<SettleResult> Settle(SettleRequest source)
 		{
-			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
-			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
+			var result = await _sabaSportApi.Settle(source);
 			_memoryDb.SetBetDetailKey(source);
 
 			return result;
 		}
 
 		[HttpPost("resettle")]
-		public async Task<ResettleResult> Resettle(
-		[FromServices] IGetService<ResettleRequest, ResettleResult> service,
-		ResettleRequest source)
+		public async Task<ResettleResult> Resettle(ResettleRequest source)
 		{
-			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
-			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
+			var result = await _sabaSportApi.Resettle(source);
 			_memoryDb.SetBetDetailKey(source);
 			return result;
 		}
 
 		[HttpPost("unsettle")]
-		public async Task<UnsettleResult> Unsettle(
-		[FromServices] IGetService<UnsettleRequest, UnsettleResult> service,
-		UnsettleRequest source)
+		public async Task<UnsettleResult> Unsettle(UnsettleRequest source)
 		{
-			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
-			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
+			var result = await _sabaSportApi.Unsettle(source);
 			_memoryDb.SetBetDetailKey(source);
 
 			return result;
@@ -152,14 +138,13 @@ namespace SabaSimulator.API.Controllers
 		[FromServices] IGetService<GetBalanceRequest, GetBalanceResult> service,
 		GetBalanceRequest source)
 		{
-			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
-			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
+			var result = await _sabaSportApi.GetBalance(source);
 
 			return result;
 		}
 
 		[HttpPost("getSabaUrl")]
-		public async Task<IActionResult> GetSabaUrl([FromQuery] string vendor_member_id)
+		public IActionResult GetSabaUrl([FromQuery] string vendor_member_id)
 		{
 			return Ok(new
 			{
@@ -169,7 +154,7 @@ namespace SabaSimulator.API.Controllers
 		}
 
 		[HttpPost("createMember")]
-		public async Task<IActionResult> CreateMember([FromForm] object data)
+		public IActionResult CreateMember([FromForm] object data)
 		{
 			return Ok(new
 			{
