@@ -48,11 +48,19 @@ namespace SabaSimulator.API.Controllers
 			_memoryDb = memoryDb;
 		}
 
+		[HttpPost("ClearLoadTestData")]
+		public async Task<IActionResult> ClearLoadTestData()
+		{
+			await _memoryDb.ClearTicketsAsync();
+
+			return Ok();
+		}
+
 		[HttpPost("PlaceBetParlay")]
 		public async Task<PlaceBetParlayResult> PlaceBetParlay(PlaceBetParlayRequest source)
 		{
-			_memoryDb.SetBetDetailKeyAsync(source);
 			var result = await _sabaSportApi.PlaceBetParlay(source);
+			await _memoryDb.SetBetDetailKeyAsync(source);
 
 			return result;
 		}
@@ -60,8 +68,8 @@ namespace SabaSimulator.API.Controllers
 		[HttpPost("PlaceBet")]
 		public async Task<PlaceBetResult> PlaceBet(PlaceBetRequest source)
 		{
-			_memoryDb.SetBetDetailKeyAsync(source);
 			var result = await _sabaSportApi.PlaceBet(source);
+			await _memoryDb.SetBetDetailKeyAsync(source);
 
 			return result;
 		}
@@ -69,8 +77,8 @@ namespace SabaSimulator.API.Controllers
 		[HttpPost("ConfirmBetParlay")]
 		public async Task<ConfirmBetParlayResult> ConfirmBetParlay(ConfirmBetParlayRequest source)
 		{
-			_memoryDb.SetBetDetailKeyAsync(source);
 			var result = await _sabaSportApi.ConfirmBetParlay(source);
+			await _memoryDb.SetBetDetailKeyAsync(source);
 
 			return result;
 		}
@@ -80,8 +88,8 @@ namespace SabaSimulator.API.Controllers
 		[FromServices] IGetService<ConfirmBetRequest, ConfirmBetResult> service,
 		ConfirmBetRequest source)
 		{
-			_memoryDb.SetBetDetailKeyAsync(source);
 			var result = await _sabaSportApi.ConfirmBet(source);
+			await _memoryDb.SetBetDetailKeyAsync(source);
 
 			return result;
 		}
@@ -95,23 +103,23 @@ namespace SabaSimulator.API.Controllers
 		}
 
 		[HttpPost("GetBetDetail")]
-		public IActionResult GetBetDetail(
+		public async Task<IActionResult> GetBetDetail(
 		[FromForm] GetBetDetailRequest source)
 		{
-			return Ok(_memoryDb.GetBetDetailAsync(source));
+			return Ok(await _memoryDb.GetBetDetailAsync(source));
 		}
 
 		[HttpPost("UpdateBetDetail")]
-		public IActionResult UpdateBetDetail([FromBody] BetDetail source)
+		public async Task<IActionResult> UpdateBetDetailAsync([FromBody] BetDetail source)
 		{
-			return Ok(_memoryDb.UpdateBetDetailAsync(source));
+			return Ok(await _memoryDb.UpdateBetDetailAsync(source));
 		}
 
 		[HttpPost("settle")]
 		public async Task<SettleResult> Settle(SettleRequest source)
 		{
-			_memoryDb.SetBetDetailKeyAsync(source);
 			var result = await _sabaSportApi.Settle(source);
+			await _memoryDb.SetBetDetailKeyAsync(source);
 
 			return result;
 		}
@@ -119,8 +127,8 @@ namespace SabaSimulator.API.Controllers
 		[HttpPost("resettle")]
 		public async Task<ResettleResult> Resettle(ResettleRequest source)
 		{
-			_memoryDb.SetBetDetailKeyAsync(source);
 			var result = await _sabaSportApi.Resettle(source);
+			await _memoryDb.SetBetDetailKeyAsync(source);
 
 			return result;
 		}
@@ -128,8 +136,8 @@ namespace SabaSimulator.API.Controllers
 		[HttpPost("unsettle")]
 		public async Task<UnsettleResult> Unsettle(UnsettleRequest source)
 		{
-			_memoryDb.SetBetDetailKeyAsync(source);
 			var result = await _sabaSportApi.Unsettle(source);
+			await _memoryDb.SetBetDetailKeyAsync(source);
 
 			return result;
 		}
