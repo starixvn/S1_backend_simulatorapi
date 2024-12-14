@@ -48,7 +48,8 @@ namespace SabaSimulator.API.Controllers
 			[FromServices] IGetService<PlaceBetParlayRequest, PlaceBetParlayResult> service,
 			PlaceBetParlayRequest source)
 		{
-			var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
+			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
 			_memoryDb.SetBetDetailKey(source);
 			return result;
 		}
@@ -58,7 +59,8 @@ namespace SabaSimulator.API.Controllers
 			[FromServices] IGetService<PlaceBetRequest, PlaceBetResult> service,
 			PlaceBetRequest source)
 		{
-			var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
+			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
 			_memoryDb.SetBetDetailKey(source);
 			return result;
 		}
@@ -68,7 +70,8 @@ namespace SabaSimulator.API.Controllers
 			[FromServices] IGetService<ConfirmBetParlayRequest, ConfirmBetParlayResult> service,
 			ConfirmBetParlayRequest source)
 		{
-			var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
+			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
 			_memoryDb.SetBetDetailKey(source);
 			return result;
 		}
@@ -78,7 +81,8 @@ namespace SabaSimulator.API.Controllers
 		[FromServices] IGetService<ConfirmBetRequest, ConfirmBetResult> service,
 		ConfirmBetRequest source)
 		{
-			var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
+			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
 			_memoryDb.SetBetDetailKey(source);
 
 			return result;
@@ -89,7 +93,8 @@ namespace SabaSimulator.API.Controllers
 			[FromServices] IGetService<CancelBetRequest, CancelBetResult> service,
 			CancelBetRequest source)
 		{
-			var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
+			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
 
 			return result;
 		}
@@ -112,7 +117,8 @@ namespace SabaSimulator.API.Controllers
 		[FromServices] IGetService<SettleRequest, SettleResult> service,
 		SettleRequest source)
 		{
-			var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
+			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
 			_memoryDb.SetBetDetailKey(source);
 
 			return result;
@@ -123,7 +129,8 @@ namespace SabaSimulator.API.Controllers
 		[FromServices] IGetService<ResettleRequest, ResettleResult> service,
 		ResettleRequest source)
 		{
-			var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
+			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
 			_memoryDb.SetBetDetailKey(source);
 			return result;
 		}
@@ -133,7 +140,8 @@ namespace SabaSimulator.API.Controllers
 		[FromServices] IGetService<UnsettleRequest, UnsettleResult> service,
 		UnsettleRequest source)
 		{
-			var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
+			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
 			_memoryDb.SetBetDetailKey(source);
 
 			return result;
@@ -144,7 +152,8 @@ namespace SabaSimulator.API.Controllers
 		[FromServices] IGetService<GetBalanceRequest, GetBalanceResult> service,
 		GetBalanceRequest source)
 		{
-			var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
+			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
 
 			return result;
 		}
@@ -163,7 +172,8 @@ namespace SabaSimulator.API.Controllers
 		public async Task<object> SabaPlusPlaceBet([FromServices] IGetService<SabaPlusPlaceBetRequest, object> service,
 		SabaPlusPlaceBetRequest source)
 		{
-			var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
+			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
 
 			return result;
 		}
@@ -172,7 +182,9 @@ namespace SabaSimulator.API.Controllers
 		public async Task<object> SabaPlusEndGame([FromServices] IGetService<SabaPlusEndGameRequest, object> service,
 		SabaPlusEndGameRequest source)
 		{
-			var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
+			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
+
 			return result;
 		}
 
@@ -180,7 +192,8 @@ namespace SabaSimulator.API.Controllers
 		public async Task<object> PlaceBetAndSettle([FromServices] IGetService<SabaPlusPlaceBetAndSettleRequest, object> service,
 		SabaPlusPlaceBetAndSettleRequest source)
 		{
-			var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
+			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
 
 			return result;
 		}
@@ -200,7 +213,8 @@ namespace SabaSimulator.API.Controllers
 				};
 				request.Headers.Add("operator-sign", operatorSign);
 
-				var response = await _httpClient.SendAsync(request);
+				var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
+				var response = await _httpClient.SendAsync(request, cts.Token);
 				if (!response.IsSuccessStatusCode)
 				{
 					var errorContent = await response.Content.ReadAsStringAsync();
@@ -219,14 +233,18 @@ namespace SabaSimulator.API.Controllers
 		[HttpPost("sabaPlus-VoidGame")]
 		public async Task<object> voidGame([FromServices] IGetService<VoidGameRequest, object> service, VoidGameRequest source)
 		{
-			var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
+			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
+
 			return result;
 		}
 
 		[HttpPost("sabaPlus-FreeSpin")]
-		public async Task<object> voidGame([FromServices] IGetService<SabaPlusFreeSpinRequest, object> service, SabaPlusFreeSpinRequest source)
+		public async Task<object> freeSpin([FromServices] IGetService<SabaPlusFreeSpinRequest, object> service, SabaPlusFreeSpinRequest source)
 		{
-			var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+			var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
+			var result = await service.GetAsync(source, cts.Token).ConfigureAwait(false);
+
 			return result;
 		}
 

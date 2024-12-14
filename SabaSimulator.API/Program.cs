@@ -19,9 +19,19 @@ builder.Services
 	.AddHttpLogging(logging => logging.LoggingFields = HttpLoggingFields.All)
 	.AddHealthChecks();
 
-builder.Services.AddHttpClient<ConfirmBetService>();
+builder.Services.AddHttpClient<BalanceService>();
 builder.Services.AddHttpClient<CancelBetService>();
+builder.Services.AddHttpClient<ConfirmBetService>();
+builder.Services.AddHttpClient<ConfirmBetparlayService>();
 builder.Services.AddHttpClient<PlaceBetService>();
+builder.Services.AddHttpClient<PlaceBetParlayService>();
+builder.Services.AddHttpClient<UnsettleService>();
+builder.Services.AddHttpClient<ResettleService>();
+builder.Services.AddHttpClient<SettleService>();
+builder.Services.AddHttpClient<SabaPlusEndGameService>();
+builder.Services.AddHttpClient<SabaPlusFreeSpinService>();
+builder.Services.AddHttpClient<SabaPlusPlaceBetAndSettleService>();
+builder.Services.AddHttpClient<SabaPlusVoidGameService>();
 
 builder.Services.AddHostedService<ClearMemoryDbJob>();
 
