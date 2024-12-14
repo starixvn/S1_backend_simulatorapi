@@ -168,6 +168,16 @@ namespace SabaSimulator.API.Controllers
 			});
 		}
 
+		[HttpPost("createMember")]
+		public async Task<IActionResult> CreateMember([FromForm] object data)
+		{
+			return Ok(new
+			{
+				error_code = 0,
+				message = $"Simulator said Oke so It's oke now"
+			});
+		}
+
 		[HttpPost("sabaPlus-PlaceBet")]
 		public async Task<object> SabaPlusPlaceBet([FromServices] IGetService<SabaPlusPlaceBetRequest, object> service,
 		SabaPlusPlaceBetRequest source)
