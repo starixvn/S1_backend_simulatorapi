@@ -1,92 +1,49 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿namespace SabaSimulator.API.Helper;
 
-namespace SabaSimulator.API.Helper;
-
-public class ConcurrentList<T>
+internal class ConcurrentList<T>
 {
-	private readonly IMemoryCache _cache;
+	private readonly List<T> list = new List<T>();
+	private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
-	private readonly string _listKey;
-
-	public ConcurrentList(string listKey, IMemoryCache memoryCache)
+	private async Task<TValue> ExecuteAsync<TValue>(Func<List<T>, TValue> action)
 	{
-		_listKey = listKey;
-		_cache = memoryCache;
-		_cache.Set(listKey, new List<T>());
-	}
-
-	private List<T> GetList()
-	{
-		return _cache.Get(_listKey) as List<T>;
-	}
-
-	public void Add(T item)
-	{
-		var list = GetList();
-		if (list != null)
+		await semaphore.WaitAsync();
+		try
 		{
-			lock (list) // Ensure thread safety
-			{
-				list.Add(item);
-				_cache.Set(_listKey, list);
-			}
+			return action(list);
+		}
+		finally
+		{
+			semaphore.Release();
 		}
 	}
 
-	public void Remove(T item)
+	private async Task ExecuteAsync(Action<List<T>> action)
 	{
-		var list = GetList();
-		if (list != null)
+		await semaphore.WaitAsync();
+		try
 		{
-			lock (list) // Ensure thread safety
-			{
-				list.Remove(item);
-				_cache.Set(_listKey, list);
-			}
+			action(list);
+		}
+		finally
+		{
+			semaphore.Release();
 		}
 	}
 
-	public List<T> GetAll()
-	{
-		var list = GetList();
-		return list != null ? new List<T>(list) : new List<T>();
-	}
+	public int Count => list.Count;
 
-	public void Clear()
-	{
-		var list = GetList();
-		if (list != null)
-		{
-			lock (list) // Ensure thread safety
-			{
-				list.Clear();
-				_cache.Set(_listKey, list);
-			}
-		}
-	}
+	public async Task Add(T item) => await ExecuteAsync(list => list.Add(item));
 
-	public T Find(Func<T, bool> predicate)
-	{
-		var list = GetList();
-		lock (list)
-		{
-			return list.FirstOrDefault(predicate);
-		}
-	}
+	public async Task<bool> Remove(T item) => await ExecuteAsync(list => list.Remove(item));
 
-	// Get the first item that matches a given predicate, or default if none found
-	public T FirstOrDefault(Func<T, bool> predicate)
-	{
-		var list = GetList();
-		lock (list)
-		{
-			return list.FirstOrDefault(predicate);
-		}
-	}
+	public async Task<T> Get(int index) => await ExecuteAsync(list => list[index]);
 
-	public int Count()
-	{
-		var list = GetList();
-		return list?.Count ?? 0;
-	}
+	public async Task<List<T>> GetAll() => await ExecuteAsync(list => new List<T>(list));
+
+	public async Task Clear() => await ExecuteAsync(list => list.Clear());
+
+	public async Task<T> FirstOrDefault(Func<T, bool> predicate) => await ExecuteAsync(list => list.FirstOrDefault(predicate));
+
+	public async Task<T> Find(Func<T, bool> predicate) => await ExecuteAsync(list => list.Find(new Predicate<T>(predicate)));
 }

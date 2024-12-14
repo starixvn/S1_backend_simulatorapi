@@ -29,7 +29,7 @@ public class ClearMemoryDbJob(ILogger<ClearMemoryDbJob> logger, IMemoryDb memory
 	{
 		logger.LogInformation("Clearing Saba Sport Tickets");
 
-		memoryDb.ClearTickets();
+		memoryDb.ClearTicketsAsync();
 	}
 
 	public Task StopAsync(CancellationToken stoppingToken)
