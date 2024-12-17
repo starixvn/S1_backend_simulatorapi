@@ -30,11 +30,22 @@ namespace SabaSimulator.API.Controllers
 			return Ok();
 		}
 
+		[HttpPost("BatchBetDetails")]
+		public async Task<IActionResult> BatchBetDetails([FromBody] List<BetDetail> betDetails)
+		{
+			await memoryDb.BatchAddBetDetail(betDetails);
+
+			return Ok(new
+			{
+				Message = "You done well, buddy",
+			});
+		}
+
 		[HttpPost("PlaceBetParlay")]
 		public async Task<PlaceBetParlayResult> PlaceBetParlay(PlaceBetParlayRequest source)
 		{
 			var tokenSource = new CancellationTokenSource();
-			tokenSource.CancelAfter(3000);
+			tokenSource.CancelAfter(30000);
 
 			var result = await sabaSportApi.PlaceBetParlay(source, tokenSource.Token);
 			await memoryDb.SetBetDetailKeyAsync(source);
@@ -46,7 +57,7 @@ namespace SabaSimulator.API.Controllers
 		public async Task<PlaceBetResult> PlaceBet(PlaceBetRequest source)
 		{
 			var tokenSource = new CancellationTokenSource();
-			tokenSource.CancelAfter(3000);
+			tokenSource.CancelAfter(30000);
 
 			var result = await sabaSportApi.PlaceBet(source, tokenSource.Token);
 			await memoryDb.SetBetDetailKeyAsync(source);

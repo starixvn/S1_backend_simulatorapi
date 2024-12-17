@@ -7,8 +7,14 @@ using SabaSimulator.API.DependencyInjection;
 using SabaSimulator.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddHttpLogging(o => { });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
+{
+	// ...
+	options.SuppressModelStateInvalidFilter = true;
+	// ...
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddMemoryCache(options =>
@@ -57,10 +63,10 @@ app.UseCors(x =>
 		.AllowCredentials());
 
 app.UseHttpsRedirection();
+app.UseHttpLogging();
 
 app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/healthz");
 app.MapHealthChecks("/");
-
 app.Run();

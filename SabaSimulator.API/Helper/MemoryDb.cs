@@ -25,6 +25,8 @@ public interface IMemoryDb
 
 	Task SetBetDetailKeyAsync(SettleRequest settleRequest);
 
+	Task BatchAddBetDetail(List<BetDetail> betDetails);
+
 	Task ClearTicketsAsync();
 
 	Task<GetBetDetailResponse> GetBetDetailAsync(GetBetDetailRequest inputs);
@@ -39,27 +41,28 @@ public class MemoryDb : IMemoryDb
 	private static long LastVersionKey = 0;
 	private static bool IsUpdated = false;
 
-	private ConcurrentList<BetDetail> _placebetTicket = new();
-	private ConcurrentList<BetDetail> _confirmBetTicket = new();
-	private ConcurrentList<BetDetail> _settledTicket = new();
+	private ConcurrentList<BetDetail> _placebetTickets = new();
+	private ConcurrentList<BetDetail> _confirmBetTickets = new();
+	private ConcurrentList<BetDetail> _settledTickets = new();
+	private List<BetDetail> _loadTestTickets = new();
 
 	public async Task ClearTicketsAsync()
 	{
-		await _placebetTicket.Clear();
-		await _confirmBetTicket.Clear();
-		await _settledTicket.Clear();
+		await _placebetTickets.Clear();
+		await _confirmBetTickets.Clear();
+		await _settledTickets.Clear();
 	}
 
 	public async Task<GetBetDetailResponse> GetBetDetailAsync(GetBetDetailRequest request)
 	{
-		var confirmBetTickets = await _confirmBetTicket.GetAll();
-		var settleBetTickets = await _settledTicket.GetAll();
+		var confirmBetTickets = await _confirmBetTickets.GetAll();
+		var settleBetTickets = await _settledTickets.GetAll();
 
 		Console.WriteLine("Request Version Key: " + request.version_key);
 		Console.WriteLine("Last Version Key: " + LastVersionKey);
-		Console.WriteLine("PlacebetTicket: " + _placebetTicket.Count);
-		Console.WriteLine("ConfirmBetTicket: ", _confirmBetTicket.Count);
-		Console.WriteLine("SettledTicket: ", _settledTicket);
+		Console.WriteLine("PlacebetTicket: " + _placebetTickets.Count);
+		Console.WriteLine("ConfirmBetTicket: ", _confirmBetTickets.Count);
+		Console.WriteLine("SettledTicket: ", _settledTickets);
 		Console.WriteLine("TicketOnQueue: ", confirmBetTickets.Count + settleBetTickets.Count);
 
 		if (IsUpdated && LastVersionKey <= request.version_key)
@@ -68,7 +71,7 @@ public class MemoryDb : IMemoryDb
 			LastVersionKey = request.version_key + 1;
 		}
 
-		return GenerateResponse(confirmBetTickets.Concat(settleBetTickets)
+		return GenerateResponse(confirmBetTickets.Concat(settleBetTickets).Concat(_loadTestTickets)
 													 .Where(bet => bet.version_key >= request.version_key)
 													 .GroupBy(bet => bet.trans_id)
 													 .SelectMany(group => group)
@@ -94,16 +97,27 @@ public class MemoryDb : IMemoryDb
 		return resposne;
 	}
 
+	public async Task BatchAddBetDetail(List<BetDetail> betDetails)
+	{
+		foreach (var bet in betDetails)
+		{
+			bet.version_key = (int)LastVersionKey;
+		}
+
+		_loadTestTickets.AddRange(betDetails);
+		IsUpdated = true;
+	}
+
 	public async Task<GetBetDetailResponse> UpdateBetDetailAsync(BetDetail betDetail)
 	{
-		var confirmBetTickets = await _confirmBetTicket.GetAll();
-		var settleBetTickets = await _settledTicket.GetAll();
+		var confirmBetTickets = await _confirmBetTickets.GetAll();
+		var settleBetTickets = await _settledTickets.GetAll();
 
-		var ticket = await _confirmBetTicket.FirstOrDefault(x => x.trans_id == betDetail.trans_id);
+		var ticket = await _confirmBetTickets.FirstOrDefault(x => x.trans_id == betDetail.trans_id);
 
 		if (ticket is null)
 		{
-			ticket = await _settledTicket.FirstOrDefault(x => x.trans_id == betDetail.trans_id);
+			ticket = await _settledTickets.FirstOrDefault(x => x.trans_id == betDetail.trans_id);
 			if (ticket is null)
 			{
 				return GenerateResponse(confirmBetTickets.Concat(settleBetTickets)
@@ -114,26 +128,26 @@ public class MemoryDb : IMemoryDb
 			}
 
 			betDetail.version_key = (int)LastVersionKey;
-			await _settledTicket.Remove(ticket);
-			await _settledTicket.Add(betDetail);
+			await _settledTickets.Remove(ticket);
+			await _settledTickets.Add(betDetail);
 			IsUpdated = true;
 
-			return GenerateResponse([await _settledTicket.Find(x => x.trans_id == betDetail.trans_id)]);
+			return GenerateResponse([await _settledTickets.Find(x => x.trans_id == betDetail.trans_id)]);
 		}
 
 		betDetail.version_key = (int)LastVersionKey;
-		await _confirmBetTicket.Remove(ticket);
-		await _confirmBetTicket.Add(betDetail);
+		await _confirmBetTickets.Remove(ticket);
+		await _confirmBetTickets.Add(betDetail);
 		IsUpdated = true;
 
-		return GenerateResponse([await _confirmBetTicket.Find(x => x.trans_id == betDetail.trans_id)]);
+		return GenerateResponse([await _confirmBetTickets.Find(x => x.trans_id == betDetail.trans_id)]);
 	}
 
 	public async Task SetBetDetailKeyAsync(SettleRequest request)
 	{
 		foreach (var transaction in request.message.Txns)
 		{
-			var savedTicket = await _confirmBetTicket.Find(ticket => ticket.trans_id.Equals(transaction.TxId));
+			var savedTicket = await _confirmBetTickets.Find(ticket => ticket.trans_id.Equals(transaction.TxId));
 			savedTicket.version_key = (int)LastVersionKey;
 			savedTicket.ticket_status = transaction.Status;
 			savedTicket.ticket_extra_status = transaction.ExtraStatus;
@@ -141,8 +155,8 @@ public class MemoryDb : IMemoryDb
 			savedTicket.winlost_datetime = DateTime.Parse(transaction.WinlostDate).ToUniversalTime().AddHours(-4);
 			savedTicket.winlost_amount = transaction.Payout - savedTicket.stake;
 
-			await _settledTicket.Add(savedTicket);
-			await _confirmBetTicket.Remove(savedTicket);
+			await _settledTickets.Add(savedTicket);
+			await _confirmBetTickets.Remove(savedTicket);
 		}
 		IsUpdated = true;
 	}
@@ -151,7 +165,7 @@ public class MemoryDb : IMemoryDb
 	{
 		foreach (var transaction in request.message.Txns)
 		{
-			var savedTicket = await _settledTicket.Find(ticket => ticket.trans_id.Equals(transaction.TxId));
+			var savedTicket = await _settledTickets.Find(ticket => ticket.trans_id.Equals(transaction.TxId));
 			savedTicket.version_key = (int)LastVersionKey;
 			savedTicket.ticket_status = transaction.Status;
 			savedTicket.ticket_extra_status = transaction.ExtraStatus;
@@ -166,11 +180,11 @@ public class MemoryDb : IMemoryDb
 	{
 		foreach (var transaction in request.message.Txns)
 		{
-			var savedTicket = await _settledTicket.Find(ticket => ticket.trans_id.Equals(transaction.TxId));
-			await _settledTicket.Remove(savedTicket);
+			var savedTicket = await _settledTickets.Find(ticket => ticket.trans_id.Equals(transaction.TxId));
+			await _settledTickets.Remove(savedTicket);
 
 			savedTicket.version_key = (int)LastVersionKey;
-			await _confirmBetTicket.Add(savedTicket);
+			await _confirmBetTickets.Add(savedTicket);
 		}
 		IsUpdated = true;
 	}
@@ -229,7 +243,7 @@ public class MemoryDb : IMemoryDb
 					ticket.leaguename = [new Leaguename { name = match.LeagueName, lang = "en" }];
 					ticket.sportname = [new Sportname { name = match.SportTypeName, lang = "en" }];
 					ticket.bettypename = [new Bettypename { name = match.BetTypeName, lang = "en" }];
-					await _placebetTicket.Add(ticket);
+					await _placebetTickets.Add(ticket);
 					continue;
 				}
 
@@ -239,7 +253,7 @@ public class MemoryDb : IMemoryDb
 					ticket.odds = parlayBetDetail.Odds ?? 0;
 					ticket.stake = parlayBetDetail.Stake;
 					ticket.bet_team = parlayBetDetail.Type.ToString();
-					await _placebetTicket.Add(ticket);
+					await _placebetTickets.Add(ticket);
 					continue;
 				}
 			}
@@ -248,7 +262,7 @@ public class MemoryDb : IMemoryDb
 
 	public async Task SetBetDetailKeyAsync(PlaceBetRequest request)
 	{
-		await _placebetTicket.Add(new BetDetail()
+		await _placebetTickets.Add(new BetDetail()
 		{
 			ref_id = request.message.RefId,
 
@@ -288,12 +302,12 @@ public class MemoryDb : IMemoryDb
 		{
 			try
 			{
-				var ticket = await _placebetTicket.Find(x => x.ref_id == transaction.RefId);
+				var ticket = await _placebetTickets.Find(x => x.ref_id == transaction.RefId);
 				ticket.version_key = (int)LastVersionKey;
 				ticket.trans_id = transaction.TxId;
 				ticket.transaction_time = DateTime.Parse(request.message.TransactionTime).ToUniversalTime().AddHours(-4).ToString();
 				ticket.ticket_status = "running";
-				await _confirmBetTicket.Add(ticket);
+				await _confirmBetTickets.Add(ticket);
 			}
 			catch (Exception ex)
 			{
@@ -310,12 +324,12 @@ public class MemoryDb : IMemoryDb
 		{
 			try
 			{
-				var ticket = await _placebetTicket.Find(x => x.ref_id == transaction.RefId);
+				var ticket = await _placebetTickets.Find(x => x.ref_id == transaction.RefId);
 				ticket.version_key = (int)LastVersionKey;
 				ticket.trans_id = transaction.TxId;
 				ticket.transaction_time = DateTime.Parse(request.message.TransactionTime).ToUniversalTime().AddHours(-4).ToString();
 				ticket.ticket_status = "running";
-				await _confirmBetTicket.Add(ticket);
+				await _confirmBetTickets.Add(ticket);
 			}
 			catch (Exception ex) { Console.WriteLine(ex.ToString()); }
 		}
