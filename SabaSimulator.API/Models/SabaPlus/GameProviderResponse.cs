@@ -1,4 +1,6 @@
-﻿namespace SabaSimulator.API.Models.SabaPlus;
+﻿using System.Text.Json.Serialization;
+
+namespace SabaSimulator.API.Models.SabaPlus;
 
 public class GameProviderResponse<TPayload>
 {
@@ -6,7 +8,7 @@ public class GameProviderResponse<TPayload>
 
 	public string? Seq => Guid.NewGuid().ToString();
 
-	public int?  ErrorCode { get; set; } = 0;
+	public int? ErrorCode { get; set; } = 0;
 
 	public string? ErrorMessage;
 

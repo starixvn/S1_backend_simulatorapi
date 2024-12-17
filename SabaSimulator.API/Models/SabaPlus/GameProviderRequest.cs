@@ -1,4 +1,6 @@
-﻿namespace SabaSimulator.API.Models.SabaPlus;
+﻿using SabaSimulator.API.Models.LaunchGame;
+
+namespace SabaSimulator.API.Models.SabaPlus;
 
 public class GameProviderRequest<TPayload>
 {

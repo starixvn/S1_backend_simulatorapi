@@ -45,18 +45,15 @@ public class SabaPlusEndGameService : IGetService<SabaPlusEndGameRequest, object
 			var validResponse = JsonSerializer.Deserialize<SabaPlusEndGameResult>(responseContent);
 			if (validResponse?.ErrorCode == 0)
 			{
-			
 				var datas = BetResultCheckBuilder.BuildBetResultBySettle(query);
 				foreach (var ticket in datas)
 				{
 					string key = $"{ticket?.Payload?.TicketNo}";
 					_memoryCache.Set(key, ticket, TimeSpan.FromMinutes(60));
 				}
-
 			}
 
 			return responseContent;
-
 		}
 		catch (Exception ex)
 		{

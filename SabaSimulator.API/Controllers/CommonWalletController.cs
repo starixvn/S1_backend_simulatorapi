@@ -7,20 +7,15 @@ namespace SabaSimulator.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CommonWalletController : ControllerBase
+public class CommonWalletController(IConfiguration configuration) : ControllerBase
 {
-	private readonly string _simulatorUrl;
-
-	public CommonWalletController(HttpClient httpClient, IConfiguration configuration)
-	{
-		_simulatorUrl = configuration["BetService:SabaPlusSimulatorUrl"];
-	}
+	private readonly string simulatorUrl = configuration["BetService:SabaPlusSimulatorUrl"] ?? string.Empty;
 
 	[HttpPost("LaunchGame")]
 	public LaunchGameResult GetSimulatorURL(LaunchGameRequest request)
 	{
 		var res = new LaunchGameResult();
-		res.Payload.ReturnUrl = $"{_simulatorUrl}?userCustId={request?.Payload?.CustInfo?.OperatorCustomerId}";
+		res.Payload.ReturnUrl = $"{simulatorUrl}?userCustId={request?.Payload?.CustInfo?.OperatorCustomerId}";
 		return res;
 	}
 
