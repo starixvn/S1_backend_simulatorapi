@@ -51,6 +51,7 @@ public class MemoryDb : IMemoryDb
 		await _placebetTickets.Clear();
 		await _confirmBetTickets.Clear();
 		await _settledTickets.Clear();
+		_loadTestTickets.Clear();
 	}
 
 	public async Task<GetBetDetailResponse> GetBetDetailAsync(GetBetDetailRequest request)
