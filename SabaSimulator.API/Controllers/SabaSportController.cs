@@ -152,10 +152,11 @@ namespace SabaSimulator.API.Controllers
 		[HttpPost("GetSabaUrl")]
 		public IActionResult GetSabaUrl([FromQuery] string vendor_member_id)
 		{
+			var queryString = string.IsNullOrEmpty(vendor_member_id) ? string.Empty : $"/{vendor_member_id}";
 			return Ok(new
 			{
 				error_code = 0,
-				data = $"{simulatorApiUrl}/${vendor_member_id}"
+				data = $"{simulatorApiUrl}{queryString}"
 			});
 		}
 
