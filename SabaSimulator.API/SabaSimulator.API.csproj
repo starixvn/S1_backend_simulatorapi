@@ -14,8 +14,22 @@
     <PackageReference Include="Refit.Newtonsoft.Json" Version="8.0.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.8.22" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
-    <PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />
+
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
+	<PackageReference Include="OpenSearch.Client" Version="1.0.0" />
+
+	  <PackageReference Include="Elastic.CommonSchema.Serilog" Version="8.6.0" />
+
+	  <PackageReference Include="Sentry.Serilog" Version="4.12.1" />
+	  <PackageReference Include="Serilog.AspNetCore" Version="6.0.1" />
+	  <PackageReference Include="Serilog.Exceptions" Version="8.3.0" />
+	  <PackageReference Include="Serilog.Sinks.Network" Version="2.0.2.68" />
+	  <PackageReference Include="Serilog.Sinks.Elasticsearch" Version="9.0.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="TGS.ServiceUtility">
+      <HintPath>loki-nuget\tgs.serviceutility\0.2.0\lib\net6.0\TGS.ServiceUtility.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

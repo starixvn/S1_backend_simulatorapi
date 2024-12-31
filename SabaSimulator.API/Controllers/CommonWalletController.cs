@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using SabaSimulator.API.Models.BetResultCheck;
 using SabaSimulator.API.Models.LaunchGame;
-using Tgs.ServiceUtility;
 
 namespace SabaSimulator.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CommonWalletController(IConfiguration configuration) : ControllerBase
+public class CommonWalletController(IConfiguration configuration, IMemoryCache memoryCache) : ControllerBase
 {
 	private readonly string simulatorUrl = configuration["BetService:SabaPlusSimulatorUrl"] ?? string.Empty;
 
@@ -20,10 +20,34 @@ public class CommonWalletController(IConfiguration configuration) : ControllerBa
 	}
 
 	[HttpPost("BetResultCheck")]
-	public async Task<BetResultCheckResponse> BetResultCheck([FromServices] IGetService<BetResultCheckRequest, BetResultCheckResponse> service,
-	 BetResultCheckRequest source)
+	public IActionResult BetResultCheck(BetResultCheckRequest source)
 	{
-		var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
-		return result;
+		string key = $"{source?.Payload?.TicketNo}";
+		memoryCache.TryGetValue(key, out BetResultCheckResponse? value);
+		if (value is not null)
+		{
+			value.Seq = Guid.NewGuid().ToString();
+			value.TimeStamp = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff");
+			return Ok(value);
+		}
+
+		return Ok(new BetResultCheckResponse
+		{
+			Seq = Guid.NewGuid().ToString(),
+			ErrorCode = 0,
+			ErrorMessage = "Success",
+			TimeStamp = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff"),
+			Payload = new BetResultPayloadModel()
+			{
+				OperatorCustId = source?.Payload?.OperatorCustId,
+				GameRoundId = "simulator-betresult-11111",
+				Payout = 100,
+				Status = 1,
+				ActualStake = 100,
+				SettleDate = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff"),
+				TicketNo = source?.Payload?.TicketNo,
+				NetStake = 100
+			}
+		});
 	}
 }

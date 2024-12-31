@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using SabaSimulator.API.Helper;
-using SabaSimulator.API.Models.SabaPlusEndGame;
 using System.Text.Json;
 using System.Text;
 using Tgs.ServiceUtility;
