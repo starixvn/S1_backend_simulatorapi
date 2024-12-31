@@ -12,7 +12,6 @@ using SabaSimulator.API.Models.Unsettle;
 using SabaSimulator.API.Helper;
 using SabaSimulator.API.Models.GetBetDetail;
 using SabaSimulator.API.ApiClient;
-using System.Text.Json;
 
 namespace SabaSimulator.API.Controllers
 {
@@ -109,14 +108,9 @@ namespace SabaSimulator.API.Controllers
 		[HttpPost("Settle")]
 		public async Task<SettleResult> Settle(SettleRequest source)
 		{
-			Console.WriteLine($"Start Settle Flow {source.message.Txns[0].TxId}");
-			Console.WriteLine($"Settle Ticket {source.message.Txns[0].TxId} Data {JsonSerializer.Serialize(source)}");
-
 			var result = await sabaSportApi.Settle(source);
-			Console.WriteLine($"Settle Ticket {source.message.Txns[0].TxId} Response {JsonSerializer.Serialize(result)}");
 
 			await memoryDb.SetBetDetailKeyAsync(source);
-			Console.WriteLine($"Settle Ticket {source.message.Txns[0].TxId} Flow Done");
 
 			return result;
 		}
@@ -157,6 +151,32 @@ namespace SabaSimulator.API.Controllers
 			{
 				error_code = 0,
 				data = $"{simulatorApiUrl}{queryString}"
+			});
+		}
+
+		[HttpPost("GetKenoDetailByTransID")]
+		public IActionResult GetKenoDetailByTransID()
+		{
+			return Ok(new
+			{
+				error_code = 0,
+				data = new
+				{
+					message = $"Simulator said Oke so It's oke now"
+				}
+			});
+		}
+
+		[HttpPost("GetBetDetailByTransID")]
+		public IActionResult GetBetDetailByTransID()
+		{
+			return Ok(new
+			{
+				error_code = 0,
+				data = new
+				{
+					message = $"Simulator said Oke so It's oke now"
+				}
 			});
 		}
 
