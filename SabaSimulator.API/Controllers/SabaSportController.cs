@@ -1,5 +1,4 @@
-﻿using Tgs.ServiceUtility;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SabaSimulator.API.Models.Balance;
 using SabaSimulator.API.Models.CancelBet;
 using SabaSimulator.API.Models.ConfirmBet;
@@ -74,9 +73,7 @@ namespace SabaSimulator.API.Controllers
 		}
 
 		[HttpPost("ConfirmBet")]
-		public async Task<ConfirmBetResult> ConfirmBet(
-		[FromServices] IGetService<ConfirmBetRequest, ConfirmBetResult> service,
-		ConfirmBetRequest source)
+		public async Task<ConfirmBetResult> ConfirmBet(ConfirmBetRequest source)
 		{
 			var result = await sabaSportApi.ConfirmBet(source);
 			await memoryDb.SetBetDetailKeyAsync(source);
@@ -134,9 +131,7 @@ namespace SabaSimulator.API.Controllers
 		}
 
 		[HttpPost("GetBalance")]
-		public async Task<GetBalanceResult> GetBalance(
-		[FromServices] IGetService<GetBalanceRequest, GetBalanceResult> service,
-		GetBalanceRequest source)
+		public async Task<GetBalanceResult> GetBalance(GetBalanceRequest source)
 		{
 			var result = await sabaSportApi.GetBalance(source);
 

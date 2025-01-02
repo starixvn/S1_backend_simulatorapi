@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SabaSimulator.API.Models.Balance;
-using Tgs.ServiceUtility;
 using SabaSimulator.API.Models.SabaPlusPlaceBet;
-using SabaSimulator.API.Models.BetResultCheck;
 using SabaSimulator.API.Models.SabaPlusEndGame;
 using SabaSimulator.API.Models.SabaPlusPlaceBetAndSettle;
 using SabaSimulator.API.Models.VoidGame;
@@ -106,19 +104,19 @@ public class SabaPlusController(ISabaPlusApi sabaPlusApi, IMemoryCache memoryCac
 		return response;
 	}
 
-	[HttpPost("UpdateBetResultCheck")]
-	public async Task<string> BetResultCheck([FromServices] IGetService<UpdateBetResultRequest, string> service,
-		UpdateBetResultRequest source)
-	{
-		var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
-		return result;
-	}
+	//[HttpPost("UpdateBetResultCheck")]
+	//public async Task<string> BetResultCheck([FromServices] IGetService<UpdateBetResultRequest, string> service,
+	//	UpdateBetResultRequest source)
+	//{
+	//	var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+	//	return result;
+	//}
 
-	[HttpPost("GetBetResultCheckByTicketId")]
-	public async Task<BetResultCheckResponse> GetResultChecks([FromServices] IGetService<GetAllBetResultChecksRequest, BetResultCheckResponse> service, GetAllBetResultChecksRequest source)
-	{
-		var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
+	//[HttpPost("GetBetResultCheckByTicketId")]
+	//public async Task<BetResultCheckResponse> GetResultChecks([FromServices] IGetService<GetAllBetResultChecksRequest, BetResultCheckResponse> service, GetAllBetResultChecksRequest source)
+	//{
+	//	var result = await service.GetAsync(source, cancellationToken: HttpContext.RequestAborted).ConfigureAwait(false);
 
-		return result;
-	}
+	//	return result;
+	//}
 }

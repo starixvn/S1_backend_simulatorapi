@@ -4,7 +4,6 @@ using SabaSimulator.API.ApiClient;
 using SabaSimulator.API.ApiClient.Handler;
 using SabaSimulator.API.CronJob;
 using SabaSimulator.API.DependencyInjection;
-using SabaSimulator.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpLogging(o => { });
@@ -40,11 +39,6 @@ builder.Services.AddScoped<SabaPlusHandler>();
 builder.Services.AddRefitClient<ISabaPlusApi>()
 	.ConfigureHttpClient(client => client.BaseAddress = new Uri(builder.Configuration["BetService:BaseSabaPlusUrl"]!))
 	.AddHttpMessageHandler<SabaPlusHandler>();
-
-builder.Services.AddHttpClient<SabaPlusEndGameService>();
-builder.Services.AddHttpClient<SabaPlusFreeSpinService>();
-builder.Services.AddHttpClient<SabaPlusPlaceBetAndSettleService>();
-builder.Services.AddHttpClient<SabaPlusVoidGameService>();
 
 builder.Services.AddHostedService<ClearMemoryDbJob>();
 
