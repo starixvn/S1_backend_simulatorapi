@@ -20,6 +20,7 @@ namespace SabaSimulator.API.Controllers
 	public class SabaSportController(IConfiguration configuration, ISabaSportApi sabaSportApi, IMemoryDb memoryDb) : ControllerBase
 	{
 		private readonly string simulatorApiUrl = configuration["BetService:SabaSportSimulatorUrl"] ?? string.Empty;
+		private readonly string OperatorKey = configuration["OperatorKey:SabaSport"] ?? string.Empty;
 
 		[HttpPost("ClearLoadTestData")]
 		public async Task<IActionResult> ClearLoadTestData()
@@ -43,10 +44,7 @@ namespace SabaSimulator.API.Controllers
 		[HttpPost("PlaceBetParlay")]
 		public async Task<PlaceBetParlayResult> PlaceBetParlay(PlaceBetParlayRequest source)
 		{
-			var tokenSource = new CancellationTokenSource();
-			tokenSource.CancelAfter(30000);
-
-			var result = await sabaSportApi.PlaceBetParlay(source, tokenSource.Token);
+			var result = await sabaSportApi.PlaceBetParlay(source);
 			await memoryDb.SetBetDetailKeyAsync(source);
 
 			return result;
@@ -58,7 +56,7 @@ namespace SabaSimulator.API.Controllers
 			var tokenSource = new CancellationTokenSource();
 			tokenSource.CancelAfter(30000);
 
-			var result = await sabaSportApi.PlaceBet(source, tokenSource.Token);
+			var result = await sabaSportApi.PlaceBet(source);
 			await memoryDb.SetBetDetailKeyAsync(source);
 
 			return result;

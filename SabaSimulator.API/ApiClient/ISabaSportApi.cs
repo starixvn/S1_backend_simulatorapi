@@ -14,10 +14,10 @@ namespace SabaSimulator.API.ApiClient;
 public interface ISabaSportApi
 {
 	[Post("/PlaceBetParlay")]
-	Task<PlaceBetParlayResult> PlaceBetParlay(PlaceBetParlayRequest req, CancellationToken cancellationToken);
+	Task<PlaceBetParlayResult> PlaceBetParlay(PlaceBetParlayRequest req);
 
 	[Post("/PlaceBet")]
-	Task<PlaceBetResult> PlaceBet(PlaceBetRequest req, CancellationToken cancellationToken);
+	Task<PlaceBetResult> PlaceBet(PlaceBetRequest req);
 
 	[Post("/ConfirmBetParlay")]
 	Task<ConfirmBetParlayResult> ConfirmBetParlay(ConfirmBetParlayRequest req);

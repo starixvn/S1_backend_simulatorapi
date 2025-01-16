@@ -39,8 +39,8 @@ public class GetBetDetailData
 
 public class BetDetail : ISabaBet
 {
-	public string ref_id { get; set; }
-	public long trans_id { get; set; }
+	public string ref_id { get; set; } = string.Empty;
+	public long trans_id { get; set; } = 0;
 	public string vendor_member_id { get; set; }
 	public string operator_id { get; set; }
 	public int? league_id { get; set; }
