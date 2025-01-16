@@ -7,7 +7,7 @@ public record PlaceBetRequest(
 
 public record PlaceBetData
 {
-	public string Action { get; set; } = "PlaceBet - Simulator"; 
+	public string Action { get; set; } = "PlaceBet";
 	public string OperationId { get; set; }
 	public string UserId { get; set; }
 	public int Currency { get; set; }
@@ -57,7 +57,6 @@ public record PlaceBetData
 	public string? VendorTransId { get; set; }
 	public decimal? MmrPercentage { get; set; }
 	public List<Voucher>? Voucher { get; set; }
-
 }
 public record Voucher
 {
